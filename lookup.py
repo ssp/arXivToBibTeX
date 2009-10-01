@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 #coding=utf-8
+"""
+arXivToWiki
+©2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net)
+"""
 
 from __future__ import with_statement
 import cgi
@@ -118,7 +122,8 @@ def pageHead():
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>Retrieve Publication Information</title>
+<title>Retrieve arXiv Information</title>
+<meta name='generator' content='arXiv to Wiki converter for CRCG by earthlingsoft; ssp-web@earthlingsoft.net'>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
@@ -141,7 +146,7 @@ textarea { width:100%; }
 <body>
 <div id="page">
 <div id="title">
-<h1>Retrieve Publication Information</h1>
+<h1>Retrieve arXiv Information</h1>
 <p class="crcg">
 <a href="http://www.crcg.de">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
 </p>
@@ -232,6 +237,58 @@ def markupForWiki(myDict):
 
 
 
+def markupForBibTeX(myDict):
+	"""
+		Input: dictionary with publication data.
+		Output: BibTeX record for the preprint.
+	"""
+	bibTeXID = myDict["ID"]
+	bibTeXAuthors = " and ".join(myDict["authors"])
+	bibTeXTitle = myDict["title"]
+	bibTeXYear = myDict["year"]
+	
+	bibTeXEntry = ["@misc{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {arXiv:", bibTeXID, "},\n"] 
+	if myDict["journal"] != None:
+		bibTeXEntry += ["Howpublished = {", myDict["journal"], "},\n"]
+	if myDict["DOI"] != None:
+		bibTeXEntry += ["Doi = {", myDict["DOI"], "},\n"]
+	bibTeXEntry += ["}"]
+	result = "".join(bibTeXEntry)
+	return result
+
+
+
+
+def markupForBibItem(myDict):
+	"""
+		Input: dictionary with publication data.
+		Output: LaTeX \bibitem command for the publication
+	"""
+	bibTeXID = myDict["ID"]
+	authors = myDict["authors"]
+	authorstring = ""
+	if len(authors) == 1:
+		authorString = authors[0]
+	else:
+		lastAuthor = authors.pop(-1)
+		authorString = ", ".join(authors) + " and " + lastAuthor
+	
+	title = myDict["title"]
+	year = myDict["year"]
+
+	bibItemCommand = ["\\bibitem{", bibTeXID, "}\n", authorString, ".\n\\newblock ", title, ", ", year]
+	if myDict["journal"] != None:
+		bibItemCommand += [",\n\\newblock ", myDict["journal"]]
+	bibItemCommand += [";\n\\newblock arXiv:", bibTeXID, "."]
+	if myDict["DOI"] != None:
+		bibItemCommand += ["\n\\newblock DOI:", myDict["DOI"], "."]
+	result = "".join(bibItemCommand)
+	return result
+
+
+
+
+
 def errorMarkup(errorText):
 	"""
 		Return markup for the error text received.
@@ -302,19 +359,23 @@ if form.has_key("papers"):
 				theYear = paper.find("{http://www.w3.org/2005/Atom}published").text.split('-')[0]
 				DOI = paper.find("{http://arxiv.org/schemas/atom}doi")
 				theDOI = None
+				extraRows = 0
 				if DOI != None:
 					theDOI = DOI.text
+					extraRows += 1
 				journal = paper.find("{http://arxiv.org/schemas/atom}journal_ref")
 				theJournal = None
 				if journal != None:
 					theJournal = journal.text
+					extraRows += 1
 				
 				publicationDict = dict({"authors": theAuthors, "title": theTitle, "abstract": theAbstract, "PDF": thePDF, "link": theLink, "ID": theID, "year": theYear, "DOI": theDOI, "journal": theJournal})
 						
 				output += ["<h2>arXiv: ", publicationDict["ID"], "</h2>\n"]
 				output += ["<p class='paperinfo'>\n", markupForHTML(publicationDict), "</p>\n"]
 				output += ["<p>Copy and paste the text below for the wiki:</p>\n<textarea class='wikiinfo' cols='70' rows='4'>\n", markupForWiki(publicationDict), "</textarea>\n"]
-				
+				output += ["<p>A simple-minded BibTeX entry for the paper:</p>\n<textarea class='bibtexinfo' cols='70' rows='", str(6 + extraRows), "'>\n", markupForBibTeX(publicationDict), "</textarea>\n"]
+				output += ["<p>A simple-minded \bibitem-command for use in LaTeX:</p>\n<textarea class='bibiteminfo' cols='70' rows='", str(4+extraRows), "'>\n", markupForBibItem(publicationDict), "</textarea>\n"]
 			print "".join(output)
 		
 print pageFoot()
