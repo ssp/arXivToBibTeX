@@ -16,33 +16,38 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-maxpapers = 5
+maxpapers = 100
 
 
 execfile("people.py")
 
+trailingRE = re.compile(r"(.*)v[0-9]*$")
+newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d$")
+sevenDigitsRE = re.compile(r"\d\d\d\d\d\d\d$")
+oldStyleIDRE = re.compile(r"[a-z-]*/\d\d\d\d\d\d\d$")
 
 def prepareArXivID(ID):
 	"""
+		first, strip potentially trailing version numbers like v4
 		0909.1234-style ID => return unchanged
 		09091234-style ID => return 0909.1234
 		0606123-style ID => return math/0606123
 		non-math/0606123-style ID => return unchanged
+		anything else => return None
 	"""
 	myID = ID.strip()
-	if  re.match(r"\d\d\d\d\.?\d\d\d\d$", myID) == None:
-		""" 
-			Not an 8 digit number: must be old style, if it doesn't contain an arXiv specifier, assume we're referring to math and prepend that. 
-		"""
-		startsWithDigit = re.match(r"\d", myID)
-		if startsWithDigit != None:
-			myID = "math/" + myID
-	else:
-		""" 
-			Convenience: insert dot in the middle of a 8 digit number in case it was not entered.
-		"""
+	myID = trailingRE.sub(r"\1", myID)
+	if  newStyleRE.match(myID) != None:
+		""" An 8 digit number (new-style): insert dot in the middle in case it's not there already.	"""
 		if re.match(r"\.", myID) == None:
 			myID = re.sub(r"(\d\d\d\d)(\d\d\d\d)$", r"\1.\2", myID)
+	elif sevenDigitsRE.match(myID) != None:
+		""" Just seven digits: prepend math/ """
+		myID = "math/" + myID
+	elif oldStyleIDRE.match(myID) != None:
+		myID = myID
+	else:
+		myID = None
 	
 	return myID
 
@@ -77,7 +82,7 @@ def theForm():
 	return """
 <form method="get" action="./lookup.py">
 <p>
-<input type="text" name="papers" class="papers" value='""" + escapeHTML(queryString) + """'>
+<input type="text" name="q" class="q" value='""" + escapeHTML(queryString) + """'>
 <input type="hidden" name="format" id="formatinput" value='""" + format + """'>
 <input type="submit" class="button" value="Retrieve Information">
 </p>
@@ -102,21 +107,26 @@ def pageHead():
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
+.clear { clear:both; }
 #title { text-align:center; margin:2em 1em; }
 p { margin: 0.5em 0em; }
-a { text-decoration: none }
-a:hover { text-decoration: underline }
+a { text-decoration: none; color: #00d; }
+a:hover { text-decoration: underline; color: #00f; }
+a:visited { color: #606; }
+a.editlink { float:right; margin-left: 1em; color: #b00;}
 h1 { font-size: 144%; margin: 0.5em;}
+a h1 { color: #000; }
 p.crcg { font-style: italic; }
 form { display:block; margin: 1em; }
 form p { text-align:center; } 
 form input { font-size: 121%; }
-form input.papers { width: 60%; margin-bottom: 6px; }
+form input.q { width: 60%; margin-bottom: 6px; }
 form input.button { position:relative; bottom: 3px; }
 h2 { font-size: 121%; margin:2em 0em 1em 0em; position:relative; }
 h2:before { content: "\\002767"; position: absolute; width: 1em; left:-1em; font-size: 360%; color: #999; }
 h2.error:before { content: "\\002718"; color: #f33; }
 ul { padding-left: 2em; }
+ul li { margin-bottom: 0.5em; } 
 .formatpicker { text-align: right; margin:1em 0em -1em 0em; }
 .formatpicker ul { display: inline; list-style-type: none; padding: 0px; }
 .formatpicker ul li { display: inline; margin-left: 0.5em; font-width: normal; padding: 0em; }
@@ -150,15 +160,29 @@ for (var i = 0; i < 3; i++) {
 <body onload="javascript:showType('""" + format + """');">
 <div id="page">
 <div id="title">
-<h1>Retrieve arXiv Information</h1>
+<a href="lookup.py"><h1>Retrieve arXiv Information</h1></a>
 <p class="crcg">
 <a ="http://www.crcg.de">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
 </p>
 </div>
+""" + theForm() 
+
+
+
+
+def extraInfo():
+	return """
 <p>
-Get information from your <a href="http://www.arxiv.org/">arXiv</a> submissions for use on the Courant Centre <a href="http://92.51.147.127/wiki/index.php?title=Main_Page">publications wiki page</a>. Enter IDs – e.g. 0909.4913 – of the papers you want to add and you will receive information formatted for copy and pasting it into the wiki.
+Use the form above to get information from your <a href="http://www.arxiv.org/">arXiv</a> submissions for use on the Courant Centre <a href="http://www.crcg.de/wiki/Publications">publications wiki page</a>. You can enter:
 </p>
-""" + theForm()
+<ul>
+<li>
+one or several <em>paper IDs</em> like “0909.4913” or “0506203”.
+</li><li>
+your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers. In case you do not have an author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>. To ensure completeness of the list created from that, please make sure that your co-authors correctly associated the paper to your arXiv account after submission.
+</ul>
+<p>
+"""
 
 
 
@@ -180,7 +204,7 @@ Georg-August-Universität Göttingen<br>
 
 
 
-def markupForHTMLItem(myDict):
+def markupForHTMLItem(myDict, type):
 	"""
 		Input: dictionary with publication data.
 		Output: HTML markup for publication data.
@@ -188,14 +212,13 @@ def markupForHTMLItem(myDict):
 	authors = myDict["authors"]
 	htmlauthors = []
 	for author in authors:
-		print author
 		if people.has_key(author):
-			address = people[author]
-			if address.startswith("User:"):
-				username = address.partition(":")[2]
-				htmlauthors += ["<a href='http://www.crcg.de/index.php?title=User:" + username + "'>" + author + "</a>"]
-			else:
+			record = people[author]
+			if record.has_key(URL):
+				address = record[URL]
 				htmlauthors += ["<a href='" + address + "'>" + author + "</a>"]
+			else:
+				htmlauthors += [author]
 		else:
 			htmlauthors += [author]
 			
@@ -205,6 +228,8 @@ def markupForHTMLItem(myDict):
 	output += ["; <a href='",  myDict["link"], "'>arXiv:", myDict["ID"], "</a>."]
 	if myDict["DOI"] != None:
 		output += [" DOI: <a href='http://dx.doi.org/", myDict["DOI"], "'>", myDict["DOI"], "</a>."]
+	if type == "Preprint":
+		output += ["<a class='editlink' href='http://arxiv.org/jref/?paperid=", myDict["ID"], "'>❧ Add journal reference</a>"]
 	return "".join(output)
 
 
@@ -216,13 +241,14 @@ def wikiMarkup(items, type):
 		wikiMarkup = []
 		htmlMarkup = []
 		for item in items:
-			wikiMarkup += [markupForWikiItem(item), "\n"]
-			htmlMarkup += [markupForHTMLItem(item)]
-			
+			wikiMarkup += [markupForWikiItem(item), "\n\n"]
+			htmlMarkup += [markupForHTMLItem(item, type)]
+		
+		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
 		if type == "Published":
 			factor = 4
-		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</ul>\n", "<p>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
+		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</ul>\n", "<p class='clear'>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
 	return markup
 	
 	
@@ -236,12 +262,12 @@ def markupForWikiItem(myDict):
 	wikiauthors = []
 	for author in authors:
 		if people.has_key(author):
-			address = people[author]
-			if address.startswith("User:"):
-				username = address.partition(":")[2]
-				wikiauthors += ["[[user:" + username + "|" + author + "]]"]
+			record = people[author]
+			if record.has_key(URL):
+				address = record[URL]
+				wikiauthors += ["[" + address + " " + author + "]"]
 			else:
-				wikiauthors += ["[[" + address + " " + author + "]]"]
+				wikiauthors += [author]
 		else:
 			wikiauthors += [author]
 	
@@ -263,9 +289,9 @@ def bibTeXMarkup(items):
 		linecount = 0
 		itemmarkup = []
 		for item in items:
-			wikimarkup = markupForBibTeXItem(item)
-			itemmarkup += [wikimarkup]
-			linecount += len(wikimarkup.split('\n'))
+			bibtexmarkup = markupForBibTeXItem(item)
+			itemmarkup += [bibtexmarkup]
+			linecount += len(bibtexmarkup.split('\n'))
 		markup += ["<p>Simple-minded BibTeX:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str(linecount + len(items) - 1), "'>\n", "\n\n".join(itemmarkup), "</textarea>\n"]
 	return markup
 	
@@ -354,9 +380,15 @@ def errorMarkup(errorText):
 form = cgi.FieldStorage()
 queryString = ""
 papers = []
-if form.has_key("papers"):
-	queryString = form["papers"].value
+personID = ""
+if form.has_key("q"):
+	queryString = form["q"].value
 	papers = list(set(re.sub(r",", r" ", queryString).split()))
+	""" for a single entry matching a regex we have an autor ID"""
+	if len(papers) == 1:
+		match = re.search(r"[a-z]*_[a-z]_[0-9]*", papers[0])
+		if match != None:
+			personID = match.string[match.start():match.end()]
 format = "wiki"
 if form.has_key("format"):
 	f = form["format"].value
@@ -364,15 +396,26 @@ if form.has_key("format"):
 		format = f
 print pageHead()
 
-if form.has_key("papers"):
-	arXivIDs = []
-	for paperID in papers:
-		arXivIDs += [prepareArXivID(paperID)]
-	arXivURL = "http://export.arxiv.org/api/query?id_list=" + ",".join(arXivIDs)  + "&max_results=" +str(maxpapers)
+if form.has_key("q"):
+	failedIDs = []
+	if personID == "":
+		arXivIDs = []
+		for paperID in papers:
+			processedID = prepareArXivID(paperID)
+			if processedID != None:
+				arXivIDs += [processedID]
+			else:
+				failedIDs += [paperID]
+		arXivURL = "http://export.arxiv.org/api/query?id_list=" + ",".join(arXivIDs) + "&max_results=" + str(maxpapers)
+	else:
+		arXivURL = "http://arxiv.org/a/" + personID + ".atom"
+		
+#	print arXivURL
 	download = urllib.urlopen(arXivURL)
 	download.encoding = "UTF-8"
 	downloadedData = download.read()
 	if downloadedData == None:
+		print extraInfo()
 		print errorMarkup("The arXiv data could not be retrieved.")
 	else:
 		publications = []
@@ -381,8 +424,15 @@ if form.has_key("papers"):
 
 		"""	Check for an error by looking at the title of the first paper: errors are marked by 'Error', empty feeds don't have a title """
 		firstTitle = feed.find("{http://www.w3.org/2005/Atom}entry/{http://www.w3.org/2005/Atom}title")
-		if firstTitle.text == "Error":
-			print errorMarkup("The arXiv returned an error for the paper ID you requested. Any chance there may be a typo in there?")
+		if firstTitle == None or firstTitle.text == "Error":
+			lookupSubject = "paper ID"
+			if personID == "" and len(papers) > 1:
+				lookupSubject = "paper IDs"
+			elif personID != "":
+				lookupSubject = "author ID"
+			
+			print extraInfo()
+			print errorMarkup("The arXiv did not return any results for the " + lookupSubject + " you entered. Any chance there may be a typo in there?")
 		else:
 			""" We got data and no error: Process it. """
 			papersiterator = feed.getiterator("{http://www.w3.org/2005/Atom}entry")
@@ -451,8 +501,8 @@ if form.has_key("papers"):
 
 			output += ["<div id='wiki'>\n"]
 			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n", """<p><a href="http://arxiv.org/jref" title="arXiv Journal reference form">Add a journal reference and <acronym title="Document Object Identifier">DOI</acronym> to the arXiv entry</a> if your paper has been published in the meantime.</p>"""]
-				output += wikiMarkup(preprints, "Preprints")
+				output += ["<h2>Preprints:</h2>\n", """<p><em>Remember to add a journal reference and <acronym title="Document Object Identifier">DOI</acronym> to the arXiv entries of published papers.</em></p>"""]
+				output += wikiMarkup(preprints, "Preprint")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
 				output += wikiMarkup(published, "Published")
@@ -474,7 +524,11 @@ if form.has_key("papers"):
 				output += bibItemMarkup(published)
 			output += ["</div>\n"]
 			
+		if len(failedIDs) > 0:
+			print """<div class="warning">The following IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n"""
 			
 		print "".join(output)
+else:
+	print extraInfo()	
 
 print pageFoot()
