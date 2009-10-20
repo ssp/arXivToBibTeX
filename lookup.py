@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #coding=utf-8
 """
-arXivToWiki v1
+arXivToWiki v2
 ©2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net)
 """
 
@@ -19,7 +19,14 @@ sys.setdefaultencoding("utf-8")
 maxpapers = 100
 
 
+
+"""
+	Load people information.
+"""
 execfile("people.py")
+
+
+
 
 trailingRE = re.compile(r"(.*)v[0-9]*$")
 newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d$")
@@ -55,15 +62,16 @@ def prepareArXivID(ID):
 
 
 
+ampRegexp = re.compile(r"&")
+ltRegexp = re.compile(r"<")
+gtRegexp = re.compile(r">")
+aposRegexp = re.compile(r"'")
+
 def escapeHTML(inputString):
 	"""
 		Input: string
 		Output: input string with < > & ' replaced by their HTML character entities
 	"""
-	ampRegexp = re.compile(r"&")
-	ltRegexp = re.compile(r"<")
-	gtRegexp = re.compile(r">")
-	aposRegexp = re.compile(r"'")
 	escapedString = ampRegexp.sub('&amp;', inputString)
 	escapedString = ltRegexp.sub('&lt;', escapedString)
 	escapedString = gtRegexp.sub('&gt;', escapedString)
@@ -76,7 +84,8 @@ def escapeHTML(inputString):
 
 def theForm():
 	"""
-		Returns HTML for the search form.
+		Returns string with HTML for the search form.
+		The form is pre-filled with the current query string.
 	"""
 	global format
 	return """
@@ -93,7 +102,7 @@ def theForm():
 
 def pageHead():
 	"""
-		Returns HTML for the http header and the top of the HTML markup including CSS.
+		Returns string with HTML for the http header and the top of the HTML markup including CSS and JavaScript.
 	"""
 	global format
 
@@ -103,7 +112,7 @@ def pageHead():
 <html>
 <head>
 <title>Retrieve arXiv Information</title>
-<meta name='generator' content='arXiv to Wiki converter for CRCG by earthlingsoft; ssp-web@earthlingsoft.net'>
+<meta name='generator' content='arXiv to Wiki converter, 2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net).'>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
@@ -132,7 +141,7 @@ ul li { margin-bottom: 0.5em; }
 .formatpicker ul li { display: inline; margin-left: 0.5em; font-width: normal; padding: 0em; }
 .format { display: none; }
 textarea { width:100%; }
-.warning { text-style: italic; font-style:italic; text-align:center; margin-top: 2em; color: #900;}
+.warning { text-style: italic; font-style:italic; text-align:center; margin: 1em 0em; color: #900;}
 #foot { font-style:italic; text-align: center; margin: 3em 0em 1em 0em; border-top: #999 solid 1px; }
 </style>
 <script type="text/javascript">
@@ -171,27 +180,63 @@ for (var i = 0; i < 3; i++) {
 
 
 def extraInfo():
+	"""
+		Returns string with HTML explaining what to enter into the form.
+		Displayed beneath the search field on pages without results.
+	"""
 	return """
 <p>
 Use the form above to get information from your <a href="http://www.arxiv.org/">arXiv</a> submissions for use on the Courant Centre <a href="http://www.crcg.de/wiki/Publications">publications wiki page</a>. You can enter:
 </p>
 <ul>
 <li>
+<p>
 one or several <em>paper IDs</em> like “0909.4913” or “0506203”.
+</p>
 </li><li>
-your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers. In case you do not have an author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>. To ensure completeness of the list created from that, please make sure that your co-authors correctly associated the paper to your arXiv account after submission.
+<p>
+your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers. 
+</p><p>
+In case you do not have an arXiv author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>. To ensure completeness of the list created from that, please make sure that your co-authors correctly associated the paper to your arXiv account after submission.
+</p><p>
+Readymade links for <acronym title="Courant Research Centre Göttingen">CRCG</acronym> members: 
+""" + memberLinks() + """.
+</p><p>
+Your name is missing in that list? <a href="http://arxiv.org/set_author_id">Get yourself an arXiv ID</a> and <a href="mailto:arXivToWiki@crcg.de?subject=My%20arXiv%20author%20ID">let us know</a>.
+</p>
 </ul>
 <p>
 """
 
 
 
+def memberLinks():
+	"""
+		Returns string with HTML containing links to look up all people with known arXiv author IDs.
+	"""
+
+	uniquemembers = dict()
+	for person in people.iteritems():
+		personName = person[0]
+		personData = person[1]
+		if personData.has_key(arXivID) and personData.has_key(default):
+			personID = personData[arXivID]
+			uniquemembers[personID] = personName
+
+	links = []
+	IDs = uniquemembers.keys()
+	IDs.sort()
+	for memberID in IDs:
+		links += ["<a href='./lookup.py?q=" + memberID + "'>" + uniquemembers[memberID] + "</a>"]
+		
+	return ", ".join(links)
+
+
 
 def pageFoot():
 	"""
-		Returns HTML for the bottom of the page.
+		Returns string with HTML for the bottom of the page.
 	"""
-
 	return """<div id="foot">
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
 Georg-August-Universität Göttingen<br>
@@ -206,7 +251,8 @@ Georg-August-Universität Göttingen<br>
 
 def markupForHTMLItem(myDict, type):
 	"""
-		Input: dictionary with publication data.
+		Input: myDict - dictionary with publication data.
+		       type   - "Preprint" or "Publication".
 		Output: HTML markup for publication data.
 	"""
 	authors = myDict["authors"]
@@ -235,6 +281,11 @@ def markupForHTMLItem(myDict, type):
 
 
 def wikiMarkup(items, type):
+	"""
+		Input: items - List of publication dictionaries.
+		       type  - "Preprint" or "Publication".
+		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information marin Wiki markup.
+	"""
 	markup = []
 	if len(items) > 0:
 
@@ -253,6 +304,9 @@ def wikiMarkup(items, type):
 	
 	
 
+
+wikiAddressRE = re.compile(r"http://www.crcg.de/wiki/(User:.*)")
+
 def markupForWikiItem(myDict):
 	"""
 		Input: dictionary with publication data.
@@ -265,7 +319,12 @@ def markupForWikiItem(myDict):
 			record = people[author]
 			if record.has_key(URL):
 				address = record[URL]
-				wikiauthors += ["[" + address + " " + author + "]"]
+				match = wikiAddressRE.match(address)
+				if match != None:
+					address = match.group(1)
+					wikiauthors += ["[[" + address + "|" + author + "]]"]
+				else:
+					wikiauthors += ["[" + address + " " + author + "]"]
 			else:
 				wikiauthors += [author]
 		else:
@@ -284,6 +343,10 @@ def markupForWikiItem(myDict):
 
 
 def bibTeXMarkup(items):
+	"""
+		Input: List of publication dictionaries.
+		Output: Array of strings containing HTML markup with a heading and a textarea full of BibTeX records.
+	"""
 	markup = []
 	if len(items) > 0:
 		linecount = 0
@@ -292,9 +355,10 @@ def bibTeXMarkup(items):
 			bibtexmarkup = markupForBibTeXItem(item)
 			itemmarkup += [bibtexmarkup]
 			linecount += len(bibtexmarkup.split('\n'))
-		markup += ["<p>Simple-minded BibTeX:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str(linecount + len(items) - 1), "'>\n", "\n\n".join(itemmarkup), "</textarea>\n"]
+		markup += ["<textarea class='wikiinfo' cols='70' rows='", str(linecount + len(items) - 1), "'>\n", "\n\n".join(itemmarkup), "</textarea>\n"]
 	return markup
 	
+
 
 def markupForBibTeXItem(myDict):
 	"""
@@ -316,7 +380,12 @@ def markupForBibTeXItem(myDict):
 	return result
 
 
+
 def bibItemMarkup(items):
+	"""
+		Input: List of publication dictionaries.
+		Output: Array of strings containing HTML markup with a heading and a textarea full of \bibitem commands.
+	"""
 	markup = []
 	if len(items) > 0:
 		linecount = 0
@@ -513,6 +582,7 @@ if form.has_key("q"):
 				output += bibTeXMarkup(preprints)
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
+				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
 				output += bibTeXMarkup(published)
 			
 			output += ["</div>\n", "<div id='bibitem'>\n"]
@@ -525,7 +595,10 @@ if form.has_key("q"):
 			output += ["</div>\n"]
 			
 		if len(failedIDs) > 0:
-			print """<div class="warning">The following IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n"""
+			if len(failedIDs) == 1:
+				print """<div class="warning">No paper with the ID “""" + failedIDs[0] + """” could be found on the arXiv.</div>\n""" 
+			else:
+				print """<div class="warning">The following paper IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n"""
 			
 		print "".join(output)
 else:
