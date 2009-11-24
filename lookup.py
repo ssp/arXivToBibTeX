@@ -5,13 +5,12 @@ arXivToWiki v2
 ©2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net)
 """
 
-from __future__ import with_statement
 import cgi
 import re
 import urllib
 from xml.etree import ElementTree
 import xml.etree
-
+import os
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -237,15 +236,18 @@ def pageFoot():
 	"""
 		Returns string with HTML for the bottom of the page.
 	"""
-	return """<div id="foot">
+	foot = ["""<div id="foot">
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
-Georg-August-Universität Göttingen<br>
-<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
+<a href="http://www.uni-goettingen.de/en/1.html">Georg-August-Universität Göttingen</a><br>"""]
+	if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
+		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
+	foot += ["""<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
 </div>	
 </div>
 </body>
 </html>
-"""
+"""]
+	return "".join(foot)
 
 
 
@@ -459,6 +461,8 @@ if form.has_key("q"):
 		if match != None:
 			personID = match.string[match.start():match.end()]
 format = "wiki"
+if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
+	format = "bibtex"
 if form.has_key("format"):
 	f = form["format"].value
 	if f in ["wiki", "bibtex", "bibitem"]:
@@ -604,4 +608,5 @@ if form.has_key("q"):
 else:
 	print extraInfo()	
 
+#cgi.print_environ()
 print pageFoot()

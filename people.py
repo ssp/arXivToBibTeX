@@ -22,6 +22,7 @@ arXivID = "arXivID"
 default = "default"
 
 people = dict({
+u"Iakovos Androulidakis":            dict(default=""),
 u"Dorothea Bahns":                   dict(URL="http://www.uni-math.gwdg.de/bahns/", default=""),
 u"Laurent Bartholdi":                dict(URL="http://www.uni-math.gwdg.de/laurent/", arXivID="bartholdi_l_1", default=""),
 u"L. Bartholdi":                     dict(URL="http://www.uni-math.gwdg.de/laurent/", arXivID="bartholdi_l_1"),
@@ -34,8 +35,10 @@ u"Hans-Christian von Bothmer":       dict(URL="http://www.crcg.de/wiki/User:Both
 u"H.-Chr. Graf von Bothmer":         dict(URL="http://www.crcg.de/wiki/User:Bothmer", arXivID="grafvbothmer_h_1"),
 u"H. -Chr. Graf von Bothmer":        dict(URL="http://www.crcg.de/wiki/User:Bothmer", arXivID="grafvbothmer_h_1"),
 u"H.-C. Graf v. Bothmer":            dict(URL="http://www.crcg.de/wiki/User:Bothmer", arXivID="grafvbothmer_h_1"),
+u"Nils Hansen":                      dict(default=""),
 u"Anders Jensen":                    dict(URL="http://www.crcg.de/wiki/User:Jensen", default =""),
 u"Anders Nedergaard Jensen":         dict(URL="http://www.crcg.de/wiki/User:Jensen"),
+u"Alexander Kahle":                  dict(default=""),
 u"Hannah Markwig":                   dict(URL="http://www.crcg.de/wiki/User:Hannah", arXivID="markwig_h_1", default=""),
 u"H. Markwig":                       dict(URL="http://www.crcg.de/wiki/User:Hannah", arXivID="markwig_h_1"),
 u"Thomas Markwig": 	                 dict(URL="http://www.mathematik.uni-kl.de/~keilen/de/index.html", default=""),
@@ -48,8 +51,11 @@ u"Pablo Ramacher":                   dict(URL="http://www.uni-math.gwdg.de/ramac
 u"Karl-Henning Rehren":              dict(URL="http://www.theorie.physik.uni-goe.de/~rehren/", default=""),
 u"Thomas Schick":                    dict(URL="http://www.uni-math.gwdg.de/schick/", arXivID="schick_t_1", default=""),
 u"T. Schick":                        dict(URL="http://www.uni-math.gwdg.de/schick/", arXivID="schick_t_1"),
+u"Franziska Schroeter":              dict(URL="http://www.crcg.de/wiki/User:Franzi"),
+u"Yunhe Sheng":                      dict(default=""),
 u"Eugenii Shustin":                  dict(URL="http://www.math.tau.ac.il/~shustin/", default=""),
 u"Andreas Thom":                     dict(URL="http://www.math.uni-leipzig.de/MI/thom/", default=""),
+u"Giorgio Trentinaglia":             dict(default=""),
 u"Yuri Tschinkel":                   dict(URL="http://www.uni-math.gwdg.de/tschinkel/", default=""),
 u"Alessandro Valentino":             dict(URL="http://www.uni-math.gwdg.de/sandro/", arXivID="valentino_a_1", default=""),
 u"Ingo Witt":                        dict(URL="http://www.uni-math.gwdg.de/iwitt/", default=""),
