@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python2.5 
 #coding=utf-8
 """
 arXivToWiki v2
-©2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net)
+©2009 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+Das Skript benötigt Python 2.5.
 """
 
 import cgi
@@ -88,7 +89,7 @@ def theForm():
 	"""
 	global format
 	return """
-<form method="get" action="./lookup.py">
+<form method="get" action="./">
 <p>
 <input type="text" name="q" class="q" value='""" + escapeHTML(queryString) + """'>
 <input type="hidden" name="format" id="formatinput" value='""" + format + """'>
@@ -104,14 +105,18 @@ def pageHead():
 		Returns string with HTML for the http header and the top of the HTML markup including CSS and JavaScript.
 	"""
 	global format
+	title = "arXiv To Wiki"
+	if runningFromBibTeXPath() == True:
+		title ="arXiv To BibTeX"
 
 	return """Content-type: text/html; charset=UTF-8
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>Retrieve arXiv Information</title>
-<meta name='generator' content='arXiv to Wiki converter, 2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net).'>
+<title>""" + title + """</title>
+<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
+<meta name='description' content='A tool to create BibTeX or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
@@ -168,9 +173,9 @@ for (var i = 0; i < 3; i++) {
 <body onload="javascript:showType('""" + format + """');">
 <div id="page">
 <div id="title">
-<a href="lookup.py"><h1>Retrieve arXiv Information</h1></a>
+<h1><a href="./">Retrieve arXiv Information</a></h1>
 <p class="crcg">
-<a ="http://www.crcg.de">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
+<a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
 </p>
 </div>
 """ + theForm() 
@@ -226,7 +231,7 @@ def memberLinks():
 	IDs = uniquemembers.keys()
 	IDs.sort()
 	for memberID in IDs:
-		links += ["<a href='./lookup.py?q=" + memberID + "'>" + uniquemembers[memberID] + "</a>"]
+		links += ["<a href='./?q=" + memberID + "'>" + uniquemembers[memberID] + "</a>"]
 		
 	return ", ".join(links)
 
@@ -238,8 +243,9 @@ def pageFoot():
 	"""
 	foot = ["""<div id="foot">
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
+<a href="http://www.uni-math.gwdg.de/en/">Mathematisches Institut</a>,
 <a href="http://www.uni-goettingen.de/en/1.html">Georg-August-Universität Göttingen</a><br>"""]
-	if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
+	if runningFromBibTeXPath() == True:
 		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
 	foot += ["""<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
 </div>	
@@ -441,6 +447,13 @@ def errorMarkup(errorText):
 
 
 
+def runningFromBibTeXPath():
+	result = False;
+	if "REQUEST_URI" in os.environ:
+		if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
+			result = True
+	return result
+
 
 
 
@@ -461,7 +474,7 @@ if form.has_key("q"):
 		if match != None:
 			personID = match.string[match.start():match.end()]
 format = "wiki"
-if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
+if runningFromBibTeXPath() == True:
 	format = "bibtex"
 if form.has_key("format"):
 	f = form["format"].value
@@ -608,5 +621,4 @@ if form.has_key("q"):
 else:
 	print extraInfo()	
 
-#cgi.print_environ()
 print pageFoot()

@@ -1,8 +1,9 @@
+#!/usr/bin/python2.5 
 #coding=utf-8
 """
 people.py
-arXivToWiki v1
-©2009 by Sven-S. Porst / earthlingsoft (ssp-web@earthlingsoft.net)
+arXivToWiki v2
+©2009 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 List of people and their web pages for automatic linking in arXivToWiki.
 """
