@@ -1,8 +1,8 @@
 #!/usr/bin/python2.5 
 #coding=utf-8
 """
-arXivToWiki v2
-©2009 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+arXivToWiki v3
+©2009-2010 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 Das Skript benötigt Python 2.5.
 """
 
@@ -91,7 +91,7 @@ def theForm():
 	return """
 <form method="get" action="./">
 <p>
-<input type="text" name="q" class="q" value='""" + escapeHTML(queryString) + """'>
+<input type="text" name="q" class="q" autofocus placeholder="09081234 OR courant_r_1" value='""" + escapeHTML(queryString) + """'>
 <input type="hidden" name="format" id="formatinput" value='""" + format + """'>
 <input type="submit" class="button" value="Retrieve Information">
 </p>
@@ -115,8 +115,8 @@ def pageHead():
 <html>
 <head>
 <title>""" + title + """</title>
-<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
-<meta name='description' content='A tool to create BibTeX or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
+<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2010 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
+<meta name='description' content='A tool to create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
@@ -151,11 +151,11 @@ textarea { width:100%; }
 <script type="text/javascript">
 function showType(type) { 
 var myType = type;
-if (type != "wiki" && type != "bibtex" && type != "bibitem") { myType = "wiki"; }
-var myTypes = new Array("wiki", "bibtex", "bibitem");
+if (type != "wiki" && type != "bibtex" && type != "bibitem" && type != "html") { myType = "wiki"; }
+var myTypes = new Array("wiki", "bibtex", "bibitem", "html");
 document.getElementById("formatinput").value = myType;
 var name;
-for (var i = 0; i < 3; i++) {
+for (var i = 0; i < myTypes.length; i++) {
 	var name = myTypes[i]
 	var linkID = name.concat("-link");
 	if (name == myType) { 
@@ -223,7 +223,7 @@ def memberLinks():
 	for person in people.iteritems():
 		personName = person[0]
 		personData = person[1]
-		if personData.has_key(arXivID) and personData.has_key(default):
+		if personData.has_key(arXivID) and personData.has_key(default) and personData.has_key(crcg):
 			personID = personData[arXivID]
 			uniquemembers[personID] = personName
 
@@ -257,11 +257,34 @@ def pageFoot():
 
 
 
-def markupForHTMLItem(myDict, type):
+
+def htmlMarkup(items, type):
+	"""
+		Input: items - List of publication dictionaries.
+		       type  - "Preprint" or "Publication".
+		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information in HTML markup.
+	"""
+	markup = []
+	if len(items) > 0:
+
+		htmlMarkup = ["<ul>\n"]
+		for item in items:
+			htmlMarkup += ["<li>\n", escapeHTML(basicMarkupForHTMLEditing(item, type)), "\n</li>"]
+		htmlMarkup += ["\n</ul>"]
+		factor = 4
+		if type == "Published":
+			factor = 5
+		markup = ["<textarea class='htmlinfo' cols='70' rows='", str( factor * len(items) + 2), "'>\n"] + htmlMarkup +  ["</textarea>\n"]
+	return markup
+
+
+
+
+def basicMarkupForHTMLEditing(myDict, type):
 	"""
 		Input: myDict - dictionary with publication data.
 		       type   - "Preprint" or "Publication".
-		Output: HTML markup for publication data.
+		Output: String with HTML markup for publication data.
 	"""
 	authors = myDict["authors"]
 	htmlauthors = []
@@ -275,16 +298,30 @@ def markupForHTMLItem(myDict, type):
 				htmlauthors += [author]
 		else:
 			htmlauthors += [author]
-			
 	output = [", ".join(htmlauthors), ': “',  myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
 		output += [", ", myDict["journal"]]
 	output += ["; <a href='",  myDict["link"], "'>arXiv:", myDict["ID"], "</a>."]
 	if myDict["DOI"] != None:
 		output += [" DOI: <a href='http://dx.doi.org/", myDict["DOI"], "'>", myDict["DOI"], "</a>."]
-	if type == "Preprint":
-		output += ["<a class='editlink' href='http://arxiv.org/jref/?paperid=", myDict["ID"], "'>❧ Add journal reference</a>"]
+	
 	return "".join(output)
+
+
+
+def markupForHTMLItemWithEditing(myDict, type):
+	"""
+		Input: myDict - dictionary with publication data.
+		       type   - "Preprint" or "Publication".
+		Output: HTML markup for publication data, potentially with arXiv edit link
+	"""
+	output = basicMarkupForHTMLEditing(myDict, type)
+
+	if type == "Preprint":
+		output += "<a class='editlink' href='http://arxiv.org/jref/?paperid=" + myDict["ID"] + "'>❧ Add journal reference</a>"
+
+	return output
+
 
 
 
@@ -292,7 +329,7 @@ def wikiMarkup(items, type):
 	"""
 		Input: items - List of publication dictionaries.
 		       type  - "Preprint" or "Publication".
-		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information marin Wiki markup.
+		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information in Wiki markup.
 	"""
 	markup = []
 	if len(items) > 0:
@@ -301,7 +338,7 @@ def wikiMarkup(items, type):
 		htmlMarkup = []
 		for item in items:
 			wikiMarkup += [markupForWikiItem(item), "\n\n"]
-			htmlMarkup += [markupForHTMLItem(item, type)]
+			htmlMarkup += [markupForHTMLItemWithEditing(item, type)]
 		
 		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
@@ -347,6 +384,7 @@ def markupForWikiItem(myDict):
 	result = "".join(wikioutput)
 	result = re.sub(r"\s+", r" ", result)
 	return result
+
 
 
 
@@ -457,6 +495,31 @@ def runningFromBibTeXPath():
 
 
 
+
+IDCleanerRE = re.compile(r"[^0-9]*([0-9]*)\.?([0-9]*)")
+
+def comparePaperDictionaries (firstPaper, secondPaper):
+	"""
+		Compare paper dictionaries.
+		Earlier years are smaller.
+		Smaller IDs within a year are smaller.
+	"""
+	comparisonResult = 0
+	if firstPaper.has_key("year") and firstPaper.has_key("ID") and secondPaper.has_key("year") and secondPaper.has_key("ID"):
+		comparisonResult = cmp(firstPaper["year"], secondPaper["year"])
+
+		if comparisonResult == 0:
+			cleanedFirstID = int(IDCleanerRE.sub(r"\1\2", firstPaper["ID"]))
+			cleanedSecondID = int(IDCleanerRE.sub(r"\1\2", secondPaper["ID"]))
+			comparisonResult = cmp(cleanedFirstID, cleanedSecondID)
+
+	return comparisonResult
+
+
+
+
+
+
 """
 	MAIN SCRIPT *****************************************************************
 """
@@ -478,7 +541,7 @@ if runningFromBibTeXPath() == True:
 	format = "bibtex"
 if form.has_key("format"):
 	f = form["format"].value
-	if f in ["wiki", "bibtex", "bibitem"]:
+	if f in ["wiki", "bibtex", "bibitem", "html"]:
 		format = f
 print pageHead()
 
@@ -570,7 +633,9 @@ if form.has_key("q"):
 			preprints = []
 			publishedIDs = []
 			published = []
-					
+			
+			publications.sort(comparePaperDictionaries, None, True)
+			
 			for publication in publications:
 				if publication["journal"] != None:
 					published += [publication]
@@ -580,7 +645,12 @@ if form.has_key("q"):
 					preprintIDs += [publication["ID"]]
 				
 
-			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n", """<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""", """<li><a onclick='javascript:showType("bibtex");' id='bibtex-link' href='#'>BibTeX</a></li>\n""", """<li><a href='javascript:showType("bibitem");' id='bibitem-link' href='#'>\\bibitem</a></li>\n""", "</ul>\n</div>\n"]
+			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n", 
+			"""<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""", 
+			"""<li><a href='javascript:showType("html");' id='html-link' href='#'>HTML</a></li>\n""", 
+			"""<li><a onclick='javascript:showType("bibtex");' id='bibtex-link' href='#'>BibTeX</a></li>\n""", 
+			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link' href='#'>\\bibitem</a></li>\n""", 
+			"</ul>\n</div>\n"]
 
 			if len(papers) >= maxpapers:
 				output += ["<div class='warning'>We can only process " + str(maxpapers) + " paper IDs at a time. " + str(len(papers) - maxpapers) + " of the IDs you entered were ignored.</div>"]
@@ -592,8 +662,18 @@ if form.has_key("q"):
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
 				output += wikiMarkup(published, "Published")
+			output += ["</div>\n"]
+
+			output += ["<div id='html'>\n"]
+			if len(preprints) > 0:
+				output += ["<h2>Preprints:</h2>\n"]
+				output += htmlMarkup(preprints, "Preprint")
+			if len(published) > 0:
+				output += ["<h2>Published:</h2>\n"]
+				output += htmlMarkup(published, "Published")
+			output += ["</div>\n"]
 	
-			output += ["</div>\n", "<div id='bibtex'>\n"]
+			output += ["<div id='bibtex'>\n"]
 			if len(preprints) > 0:
 				output += ["<h2>Preprints:</h2>\n"]
 				output += bibTeXMarkup(preprints)
@@ -601,8 +681,9 @@ if form.has_key("q"):
 				output += ["<h2>Published:</h2>\n"]
 				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
 				output += bibTeXMarkup(published)
-			
-			output += ["</div>\n", "<div id='bibitem'>\n"]
+			output += ["</div>\n"]
+
+			output += ["<div id='bibitem'>\n"]
 			if len(preprints) > 0:
 				output += ["<h2>Preprints:</h2>\n"]
 				output += bibItemMarkup(preprints)
