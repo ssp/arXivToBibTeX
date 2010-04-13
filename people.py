@@ -26,7 +26,8 @@ crcg = "crcg"
 
 people = dict({
 u"Iakovos Androulidakis":            dict(default="", crcg=""),
-u"Dorothea Bahns":                   dict(URL="http://www.uni-math.gwdg.de/bahns/", default="", crcg=""),
+u"Dorothea Bahns":                   dict(URL="http://www.uni-math.gwdg.de/bahns/", arXivID="bahns_d_1", default="", crcg=""),
+u"D. Bahns":                         dict(URL="http://www.uni-math.gwdg.de/bahns/", arXivID="bahns_d_1", crcg=""),
 u"Laurent Bartholdi":                dict(URL="http://www.uni-math.gwdg.de/laurent/", arXivID="bartholdi_l_1", default="", crcg=""),
 u"L. Bartholdi":                     dict(URL="http://www.uni-math.gwdg.de/laurent/", arXivID="bartholdi_l_1", crcg=""),
 u"Christian Böhning":                dict(URL="http://www.uni-math.gwdg.de/boehning/", default="", crcg=""),
