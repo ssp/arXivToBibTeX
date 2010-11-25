@@ -1,0 +1,8 @@
+AddHandler cgi-script .py
+Options +ExecCGI
+
+DirectoryIndex lookup.py
+
+RewriteEngine ON
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteRule (.*) /arXivToWiki/lookup.py$1
