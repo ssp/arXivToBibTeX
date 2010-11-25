@@ -1,7 +1,7 @@
 #!/usr/bin/python2.5 
 #coding=utf-8
 """
-arXivToWiki v3
+arXivToWiki v4
 ©2009-2010 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 Das Skript benötigt Python 2.5.
 """
@@ -126,7 +126,7 @@ p { margin: 0.5em 0em; }
 a { text-decoration: none; color: #00d; }
 a:hover { text-decoration: underline; color: #00f; }
 a:visited { color: #606; }
-a.editlink { float:right; margin-left: 1em; color: #b00;}
+a.editlink { color: #b00;}
 h1 { font-size: 144%; margin: 0.5em;}
 a h1 { color: #000; }
 p.crcg { font-style: italic; }
@@ -243,7 +243,7 @@ def pageFoot():
 	"""
 	foot = ["""<div id="foot">
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
-<a href="http://www.uni-math.gwdg.de/en/">Mathematisches Institut</a>,
+<a href="http://www.uni-goettingen.de/en/20693.html">Mathematisches Institut</a>,
 <a href="http://www.uni-goettingen.de/en/1.html">Georg-August-Universität Göttingen</a><br>"""]
 	if runningFromBibTeXPath() == True:
 		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
@@ -309,21 +309,6 @@ def basicMarkupForHTMLEditing(myDict, type):
 
 
 
-def markupForHTMLItemWithEditing(myDict, type):
-	"""
-		Input: myDict - dictionary with publication data.
-		       type   - "Preprint" or "Publication".
-		Output: HTML markup for publication data, potentially with arXiv edit link
-	"""
-	output = basicMarkupForHTMLEditing(myDict, type)
-
-	if type == "Preprint":
-		output += "<a class='editlink' href='http://arxiv.org/jref/?paperid=" + myDict["ID"] + "'>❧ Add journal reference</a>"
-
-	return output
-
-
-
 
 def wikiMarkup(items, type):
 	"""
@@ -338,7 +323,7 @@ def wikiMarkup(items, type):
 		htmlMarkup = []
 		for item in items:
 			wikiMarkup += [markupForWikiItem(item), "\n\n"]
-			htmlMarkup += [markupForHTMLItemWithEditing(item, type)]
+			htmlMarkup += [basicMarkupForHTMLEditing(item, type)]
 		
 		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
@@ -655,9 +640,11 @@ if form.has_key("q"):
 			if len(papers) >= maxpapers:
 				output += ["<div class='warning'>We can only process " + str(maxpapers) + " paper IDs at a time. " + str(len(papers) - maxpapers) + " of the IDs you entered were ignored.</div>"]
 
+			journalrefnote = """<p><em>Please <a class="editlink" href="http://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <acronym title="Document Object Identifier">DOI</acronym> for your papers as soon as they are published</a>.</em></p>"""
+
 			output += ["<div id='wiki'>\n"]
 			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n", """<p><em>Remember to add a journal reference and <acronym title="Document Object Identifier">DOI</acronym> to the arXiv entries of published papers.</em></p>"""]
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
 				output += wikiMarkup(preprints, "Preprint")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
@@ -666,7 +653,7 @@ if form.has_key("q"):
 
 			output += ["<div id='html'>\n"]
 			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n"]
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
 				output += htmlMarkup(preprints, "Preprint")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
@@ -675,7 +662,7 @@ if form.has_key("q"):
 	
 			output += ["<div id='bibtex'>\n"]
 			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n"]
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
 				output += bibTeXMarkup(preprints)
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
@@ -685,7 +672,7 @@ if form.has_key("q"):
 
 			output += ["<div id='bibitem'>\n"]
 			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n"]
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
 				output += bibItemMarkup(preprints)
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
