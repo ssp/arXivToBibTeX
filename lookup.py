@@ -2,8 +2,14 @@
 #coding=utf-8
 """
 arXivToWiki v2
-©2009 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
-Das Skript benötigt Python 2.5.
+©2009-2010 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+Created for Courant Research Centre ‘Higher Order Structures in Mathematics’ <http://crcg.de>
+
+Links for form submission refer to the folder of the current path without a further filename: 
+	/?q=searchTerm
+Your server setup (.htacess file) needs to make sure that these requests are redirected to the script.
+
+Requires Python 2.5.
 """
 
 import cgi
