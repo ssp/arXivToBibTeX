@@ -113,8 +113,10 @@ def pageHead():
 	global format
 	title = "arXiv To Wiki"
 	if runningFromBibTeXPath() == True:
-		title ="arXiv To BibTeX"
-
+		title = "arXiv To BibTeX"
+	elif runningFromHTMLPath() == True:
+		title = "arXiv to HTML"
+		
 	return """Content-type: text/html; charset=UTF-8
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -251,7 +253,7 @@ def pageFoot():
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
 <a href="http://www.uni-goettingen.de/en/20693.html">Mathematisches Institut</a>,
 <a href="http://www.uni-goettingen.de/en/1.html">Georg-August-Universität Göttingen</a><br>"""]
-	if runningFromBibTeXPath() == True:
+	if (runningFromBibTeXPath() == True) or (runningFromHTMLPath() == True):
 		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
 	foot += ["""<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
 </div>	
@@ -484,6 +486,13 @@ def runningFromBibTeXPath():
 	return result
 
 
+def runningFromHTMLPath():
+	result = False;
+	if "REQUEST_URI" in os.environ:
+		if os.environ["REQUEST_URI"].lower().find("html") != -1:
+			result = True
+	return result
+
 
 
 
@@ -530,6 +539,8 @@ if form.has_key("q"):
 format = "wiki"
 if runningFromBibTeXPath() == True:
 	format = "bibtex"
+elif runningFromHTMLPath() == True:
+	format = "html"
 if form.has_key("format"):
 	f = form["format"].value
 	if f in ["wiki", "bibtex", "bibitem", "html"]:
@@ -550,7 +561,6 @@ if form.has_key("q"):
 	else:
 		arXivURL = "http://arxiv.org/a/" + personID + ".atom"
 		
-#	print arXivURL
 	download = urllib.urlopen(arXivURL)
 	download.encoding = "UTF-8"
 	downloadedData = download.read()
