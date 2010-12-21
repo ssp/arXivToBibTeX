@@ -2,7 +2,7 @@
 #coding=utf-8
 """
 people.py
-arXivToWiki v4
+arXivToWiki v4.1
 ©2009-2010 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 List of people and their web pages for automatic linking in arXivToWiki.
@@ -25,7 +25,6 @@ default = "default"
 crcg = "crcg"
 
 people = dict({
-u"Iakovos Androulidakis":            dict(default="", crcg=""),
 u"Dorothea Bahns":                   dict(URL="http://www.uni-math.gwdg.de/bahns/", arXivID="bahns_d_1", default="", crcg=""),
 u"D. Bahns":                         dict(URL="http://www.uni-math.gwdg.de/bahns/", arXivID="bahns_d_1", crcg=""),
 u"Laurent Bartholdi":                dict(URL="http://www.uni-math.gwdg.de/laurent/", arXivID="bartholdi_l_1", default="", crcg=""),
@@ -41,7 +40,11 @@ u"H. -Chr. Graf von Bothmer":        dict(URL="http://www.crcg.de/wiki/User:Both
 u"H.-C. Graf v. Bothmer":            dict(URL="http://www.crcg.de/wiki/User:Bothmer", arXivID="grafvbothmer_h_1", crcg=""),
 u"Jörg Brüdern":                     dict(default="", crcg=""),
 u"Arne Buchholz":                    dict(URL="http://www.crcg.de/wiki/User:Buchholz", default="", crcg=""),
+u"Dzmitry Dudko":                    dict(default="", crcg=""),
+u"Łukasz Grabowski":                 dict(arXivID="grabowski_l_1", default="", crcg=""),
+u"Lukasz Grabowski":                 dict(arXivID="grabowski_l_1", crcg=""),
 u"Nils Hansen":                      dict(default="", crcg=""),
+u"Bernd Hoffmann":                   dict(default="", crcg=""),
 u"Anders Jensen":                    dict(URL="http://www.crcg.de/wiki/User:Jensen", arXivID="jensen_a_1", default ="", crcg=""),
 u"Anders N. Jensen":                 dict(URL="http://www.crcg.de/wiki/User:Jensen", crcg=""),
 u"A. N. Jensen":                     dict(URL="http://www.crcg.de/wiki/User:Jensen", crcg=""),
@@ -52,19 +55,29 @@ u"Hannah Markwig":                   dict(URL="http://www.crcg.de/wiki/User:Hann
 u"H. Markwig":                       dict(URL="http://www.crcg.de/wiki/User:Hannah", arXivID="markwig_h_1", crcg=""),
 u"Thomas Markwig": 	                 dict(URL="http://www.mathematik.uni-kl.de/~keilen/de/index.html", default="", crcg=""),
 u"Thomas Keilen": 	                 dict(URL="http://www.mathematik.uni-kl.de/~keilen/de/index.html", default="", crcg=""),
+u"Holger Knuth":                     dict(default="", crcg=""),
 u"Jakob Kröker":                     dict(URL="http://www.crcg.de/wiki/User:Kroeker", default="", crcg=""),
 u"Ralf Meyer":                       dict(URL="http://www.uni-math.gwdg.de/rameyer/", arXivID="meyer_r_1", default="", crcg=""),
 u"Preda Mihăilescu":                 dict(URL="http://www.uni-math.gwdg.de/preda/", default="", crcg=""),
 u"Preda Mihailescu":                 dict(URL="http://www.uni-math.gwdg.de/preda/", crcg=""),
+u"Patrick Neumann":                  dict(default="", crcg=""),
+u"P. Neumann":   	                 dict(crcg=""),
 u"Samuel J. Patterson":              dict(URL="http://www.uni-math.gwdg.de/sjp/", default="", crcg=""),
+u"Alexander Pavlov":                 dict(default="", crcg=""),
+u"Alexander A. Pavlov":              dict(crcg=""),
+u"A. A. Pavlov":                     dict(crcg=""),
+u"Ulrich Pennig":                    dict(default="", crcg=""),
+u"U. Pennig":                        dict(crcg=""),
+u"Gabriele Ranieri":                 dict(default="", crcg=""),
 u"Karl-Henning Rehren":              dict(URL="http://www.theorie.physik.uni-goe.de/~rehren/", arXivID="rehren_k_1", default="", crcg=""),
 u"K. -H. Rehren":                    dict(URL="http://www.theorie.physik.uni-goe.de/~rehren/", arXivID="rehren_k_1", crcg=""),
 u"Thomas Schick":                    dict(URL="http://www.uni-math.gwdg.de/schick/", arXivID="schick_t_1", default="", crcg=""),
 u"T. Schick":                        dict(URL="http://www.uni-math.gwdg.de/schick/", arXivID="schick_t_1", crcg=""),
 u"Franziska Schroeter":              dict(URL="http://www.crcg.de/wiki/User:Franzi", crcg=""),
-u"Eugenii Shustin":                  dict(URL="http://www.math.tau.ac.il/~shustin/", default="", crcg=""),
 u"Giorgio Trentinaglia":             dict(default="", crcg=""),
+u"Luca Tomassini":                   dict(default="", crcg=""),
 u"Alessandro Valentino":             dict(URL="http://www.uni-math.gwdg.de/sandro/", arXivID="valentino_a_1", default="", crcg=""),
+u"Stefan Wiedmann":                  dict(URL="http://www.uni-math.gwdg.de/wiedmann/", arXivID="wiedmann_s_1", default="", crcg=""),
 u"Ingo Witt":                        dict(URL="http://www.uni-math.gwdg.de/iwitt/", default="", crcg=""),
 u"Jochen Zahn":                      dict(default="", crcg=""),
 u"Chenchang Zhu":                    dict(URL="http://www.crcg.de/wiki/User:Zhu", arXivID="zhu_c_1", default="", crcg=""),
