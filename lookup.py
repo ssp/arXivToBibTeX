@@ -61,7 +61,7 @@ def prepareArXivID(ID):
 		myID = myID
 	else:
 		myID = None
-	
+
 	return myID
 
 
@@ -116,7 +116,7 @@ def pageHead():
 		title = "arXiv To BibTeX"
 	elif runningFromHTMLPath() == True:
 		title = "arXiv to HTML"
-		
+
 	return """Content-type: text/html; charset=UTF-8
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -139,7 +139,7 @@ h1 { font-size: 144%; margin: 0.5em;}
 a h1 { color: #000; }
 p.crcg { font-style: italic; }
 form { display:block; margin: 1em; }
-form p { text-align:center; } 
+form p { text-align:center; }
 form input { font-size: 121%; }
 form input.q { width: 60%; margin-bottom: 6px; }
 form input.button { position:relative; bottom: 3px; }
@@ -147,7 +147,7 @@ h2 { font-size: 121%; margin:2em 0em 1em 0em; position:relative; }
 h2:before { content: "\\002767"; position: absolute; width: 1em; left:-1em; font-size: 360%; color: #999; }
 h2.error:before { content: "\\002718"; color: #f33; }
 ul { padding-left: 2em; }
-ul li { margin-bottom: 0.5em; } 
+ul li { margin-bottom: 0.5em; }
 .formatpicker { text-align: right; margin:1em 0em -1em 0em; }
 .formatpicker ul { display: inline; list-style-type: none; padding: 0px; }
 .formatpicker ul li { display: inline; margin-left: 0.5em; font-width: normal; padding: 0em; }
@@ -157,7 +157,7 @@ textarea { width:100%; }
 #foot { font-style:italic; text-align: center; margin: 3em 0em 1em 0em; border-top: #999 solid 1px; }
 </style>
 <script type="text/javascript">
-function showType(type) { 
+function showType(type) {
 var myType = type;
 if (type != "wiki" && type != "bibtex" && type != "bibitem" && type != "html") { myType = "wiki"; }
 var myTypes = new Array("wiki", "bibtex", "bibitem", "html");
@@ -166,13 +166,13 @@ var name;
 for (var i = 0; i < myTypes.length; i++) {
 	var name = myTypes[i]
 	var linkID = name.concat("-link");
-	if (name == myType) { 
+	if (name == myType) {
 		document.getElementById(name).style.display = "block";
 		document.getElementById(linkID).style.fontWeight = "bold";
 	}
 	else {
 		document.getElementById(name).style.display = "none";
-		document.getElementById(linkID).style.fontWeight = "normal";		
+		document.getElementById(linkID).style.fontWeight = "normal";
 	}
 }
 }
@@ -186,7 +186,7 @@ for (var i = 0; i < myTypes.length; i++) {
 <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
 </p>
 </div>
-""" + theForm() 
+""" + theForm()
 
 
 
@@ -207,11 +207,11 @@ one or several <em>paper IDs</em> like “0909.4913” or “0506203”.
 </p>
 </li><li>
 <p>
-your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers. 
+your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers.
 </p><p>
 In case you do not have an arXiv author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>. To ensure completeness of the list created from that, please make sure that your co-authors correctly associated the paper to your arXiv account after submission.
 </p><p>
-Readymade links for <acronym title="Courant Research Centre Göttingen">CRCG</acronym> members: 
+Readymade links for <acronym title="Courant Research Centre Göttingen">CRCG</acronym> members:
 """ + memberLinks() + """.
 </p><p>
 Your name is missing in that list? <a href="http://arxiv.org/set_author_id">Get yourself an arXiv ID</a> and <a href="mailto:arXivToWiki@crcg.de?subject=My%20arXiv%20author%20ID">let us know</a>.
@@ -240,7 +240,7 @@ def memberLinks():
 	IDs.sort()
 	for memberID in IDs:
 		links += ["<a href='./?q=" + memberID + "'>" + uniquemembers[memberID] + "</a>"]
-		
+
 	return ", ".join(links)
 
 
@@ -256,7 +256,7 @@ def pageFoot():
 	if (runningFromBibTeXPath() == True) or (runningFromHTMLPath() == True):
 		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
 	foot += ["""<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
-</div>	
+</div>
 </div>
 </body>
 </html>
@@ -312,7 +312,7 @@ def basicMarkupForHTMLEditing(myDict, type):
 	output += ["; <a href='",  myDict["link"], "'>arXiv:", myDict["ID"], "</a>."]
 	if myDict["DOI"] != None:
 		output += [" DOI: <a href='http://dx.doi.org/", myDict["DOI"], "'>", myDict["DOI"], "</a>."]
-	
+
 	return "".join(output)
 
 
@@ -332,15 +332,15 @@ def wikiMarkup(items, type):
 		for item in items:
 			wikiMarkup += [markupForWikiItem(item), "\n\n"]
 			htmlMarkup += [basicMarkupForHTMLEditing(item, type)]
-		
+
 		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
 		if type == "Published":
 			factor = 4
 		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</ul>\n", "<p class='clear'>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
 	return markup
-	
-	
+
+
 
 
 wikiAddressRE = re.compile(r"http://www.crcg.de/wiki/(User:.*)")
@@ -367,7 +367,7 @@ def markupForWikiItem(myDict):
 				wikiauthors += [author]
 		else:
 			wikiauthors += [author]
-	
+
 	wikioutput = ["* ", ", ".join(wikiauthors), ': “', myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
 			wikioutput += [", ", myDict["journal"]]
@@ -396,7 +396,7 @@ def bibTeXMarkup(items):
 			linecount += len(bibtexmarkup.split('\n'))
 		markup += ["<textarea class='wikiinfo' cols='70' rows='", str(linecount + len(items) - 1), "'>\n", "\n\n".join(itemmarkup), "</textarea>\n"]
 	return markup
-	
+
 
 
 def markupForBibTeXItem(myDict):
@@ -408,8 +408,8 @@ def markupForBibTeXItem(myDict):
 	bibTeXAuthors = " and ".join(myDict["authors"])
 	bibTeXTitle = myDict["title"]
 	bibTeXYear = myDict["year"]
-	
-	bibTeXEntry = ["@misc{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {arXiv:", bibTeXID, "},\n"] 
+
+	bibTeXEntry = ["@misc{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {arXiv:", bibTeXID, "},\n"]
 	if myDict["journal"] != None:
 		bibTeXEntry += ["Howpublished = {", myDict["journal"], "},\n"]
 	if myDict["DOI"] != None:
@@ -435,7 +435,7 @@ def bibItemMarkup(items):
 			linecount += len(bibItem.split('\n'))
 		markup = ["<p>Simple-minded \\bibitems:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str(linecount + 3), "'>\\begin{thebibliography}\n\n", "\n".join(itemmarkup), "\n\end{thebibliography}</textarea>\n"]
 	return markup
-	
+
 
 def markupForBibItem(myDict):
 	"""
@@ -450,7 +450,7 @@ def markupForBibItem(myDict):
 	else:
 		lastAuthor = authors.pop(-1)
 		authorString = ", ".join(authors) + " and " + lastAuthor
-	
+
 	title = myDict["title"]
 	year = myDict["year"]
 
@@ -560,7 +560,7 @@ if form.has_key("q"):
 		arXivURL = "http://export.arxiv.org/api/query?id_list=" + ",".join(arXivIDs) + "&max_results=" + str(maxpapers)
 	else:
 		arXivURL = "http://arxiv.org/a/" + personID + ".atom"
-		
+
 	download = urllib.urlopen(arXivURL)
 	download.encoding = "UTF-8"
 	downloadedData = download.read()
@@ -580,7 +580,7 @@ if form.has_key("q"):
 				lookupSubject = "paper IDs"
 			elif personID != "":
 				lookupSubject = "author ID"
-			
+
 			print extraInfo()
 			print errorMarkup("The arXiv did not return any results for the " + lookupSubject + " you entered. Any chance there may be a typo in there?")
 		else:
@@ -591,7 +591,7 @@ if form.has_key("q"):
 				if titleElement == None:
 					continue
 				theTitle = re.sub(r"\s*\n\s*", r" ", titleElement.text)
-				
+
 				authors = paper.getiterator("{http://www.w3.org/2005/Atom}author")
 				theAuthors = []
 				for author in authors:
@@ -624,7 +624,7 @@ if form.has_key("q"):
 				if journal != None:
 					theJournal = journal.text
 					extraRows += 1
-				
+
 				publicationDict = dict({"authors": theAuthors, "title": theTitle, "abstract": theAbstract, "PDF": thePDF, "link": theLink, "ID": theID, "year": theYear, "DOI": theDOI, "journal": theJournal})
 
 				publications += [publicationDict]
@@ -634,9 +634,9 @@ if form.has_key("q"):
 			preprints = []
 			publishedIDs = []
 			published = []
-			
+
 			publications.sort(comparePaperDictionaries, None, True)
-			
+
 			for publication in publications:
 				if publication["journal"] != None:
 					published += [publication]
@@ -644,13 +644,13 @@ if form.has_key("q"):
 				else:
 					preprints += [publication]
 					preprintIDs += [publication["ID"]]
-				
 
-			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n", 
-			"""<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""", 
-			"""<li><a href='javascript:showType("html");' id='html-link' href='#'>HTML</a></li>\n""", 
-			"""<li><a onclick='javascript:showType("bibtex");' id='bibtex-link' href='#'>BibTeX</a></li>\n""", 
-			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link' href='#'>\\bibitem</a></li>\n""", 
+
+			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n",
+			"""<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""",
+			"""<li><a href='javascript:showType("html");' id='html-link' href='#'>HTML</a></li>\n""",
+			"""<li><a onclick='javascript:showType("bibtex");' id='bibtex-link' href='#'>BibTeX</a></li>\n""",
+			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link' href='#'>\\bibitem</a></li>\n""",
 			"</ul>\n</div>\n"]
 
 			if len(papers) >= maxpapers:
@@ -675,7 +675,7 @@ if form.has_key("q"):
 				output += ["<h2>Published:</h2>\n"]
 				output += htmlMarkup(published, "Published")
 			output += ["</div>\n"]
-	
+
 			output += ["<div id='bibtex'>\n"]
 			if len(preprints) > 0:
 				output += ["<h2>Preprints:</h2>\n", journalrefnote]
@@ -694,15 +694,15 @@ if form.has_key("q"):
 				output += ["<h2>Published:</h2>\n"]
 				output += bibItemMarkup(published)
 			output += ["</div>\n"]
-			
+
 		if len(failedIDs) > 0:
 			if len(failedIDs) == 1:
-				print """<div class="warning">No paper with the ID “""" + failedIDs[0] + """” could be found on the arXiv.</div>\n""" 
+				print """<div class="warning">No paper with the ID “""" + failedIDs[0] + """” could be found on the arXiv.</div>\n"""
 			else:
 				print """<div class="warning">The following paper IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n"""
-			
+
 		print "".join(output)
 else:
-	print extraInfo()	
+	print extraInfo()
 
 print pageFoot()
