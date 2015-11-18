@@ -35,15 +35,15 @@ execfile("people.py")
 
 
 trailingRE = re.compile(r"(.*)v[0-9]*$")
-newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d$")
+newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d+$")
 sevenDigitsRE = re.compile(r"\d\d\d\d\d\d\d$")
 oldStyleIDRE = re.compile(r"[a-z-]*/\d\d\d\d\d\d\d$")
 
 def prepareArXivID(ID):
 	"""
 		first, strip potentially trailing version numbers like v4
-		0909.1234-style ID => return unchanged
-		09091234-style ID => return 0909.1234
+		0909.1234/1504.12345-style ID => return unchanged
+		09091234/159412345-style ID => return 0909.1234/1504.12345
 		0606123-style ID => return math/0606123
 		non-math/0606123-style ID => return unchanged
 		anything else => return None
@@ -51,9 +51,9 @@ def prepareArXivID(ID):
 	myID = ID.strip()
 	myID = trailingRE.sub(r"\1", myID)
 	if  newStyleRE.match(myID) != None:
-		""" An 8 digit number (new-style): insert dot in the middle in case it's not there already.	"""
+		""" An 8+ digit number (new-style): insert dot in the middle in case it's not there already.	"""
 		if re.match(r"\.", myID) == None:
-			myID = re.sub(r"(\d\d\d\d)(\d\d\d\d)$", r"\1.\2", myID)
+			myID = re.sub(r"(\d\d\d\d)(\d\d\d\d+)$", r"\1.\2", myID)
 	elif sevenDigitsRE.match(myID) != None:
 		""" Just seven digits: prepend math/ """
 		myID = "math/" + myID
