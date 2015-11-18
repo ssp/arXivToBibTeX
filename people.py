@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5 
+#!/usr/bin/python
 #coding=utf-8
 """
 people.py
@@ -15,7 +15,7 @@ List of people and their web pages for automatic linking in arXivToWiki.
 		arXivID -> arXiv ID for the person
 		default -> key whose existense indicates this is the default entry for the person in question
 		crcg	-> indicates that this person is a proper CRCG member and will be explicitly listed as such
-		
+
 	Be sure to precede the name string with a u, e.g. u"Carl Müller".
 """
 
@@ -97,4 +97,3 @@ u"Yuri Tschinkel":                   dict(URL="http://www.uni-math.gwdg.de/tschi
 u"Christoph Wockel":				dict(URL="http://wockel.eu/", arXivID="wockel_c_1", default=""),
 u"Sven-S. Porst":					dict(URL="http://earthlingsoft.net/ssp/", arXivID="porst_s_1", default="")
 })
-

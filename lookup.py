@@ -1,15 +1,18 @@
-#!/usr/bin/python2.5 
+#!/usr/bin/python
 #coding=utf-8
 """
-arXivToWiki v4
-©2009-2010 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
-Created for Courant Research Centre ‘Higher Order Structures in Mathematics’ <http://crcg.de>
+arXivToWiki v5
+©2009-2015 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
-Links for form submission refer to the folder of the current path without a further filename: 
+Originally created for Courant Research Centre
+‘Higher Order Structures in Mathematics’ <http://crcg.de>
+
+Links for form submission refer to the folder of the current path without a
+further filename:
 	/?q=searchTerm
-Your server setup (.htacess file) needs to make sure that these requests are redirected to the script.
 
-Requires Python 2.5.
+Your server setup (.htaccess file) needs to make sure that these requests are
+redirected to the script.
 """
 
 import cgi
@@ -25,11 +28,13 @@ sys.setdefaultencoding("utf-8")
 maxpapers = 100
 
 
-
 """
 	Load people information.
 """
-execfile("people.py")
+isPersonalised = False
+people = dict()
+if isPersonalised:
+	execfile("people.py")
 
 
 
@@ -97,7 +102,7 @@ def theForm():
 	return """
 <form method="get" action="./">
 <p>
-<input type="text" name="q" class="q" autofocus placeholder="09081234 OR courant_r_1" value='""" + escapeHTML(queryString) + """'>
+<input type="text" name="q" class="q" autofocus placeholder="1510.01797 or courant_r_1" value='""" + escapeHTML(queryString) + """'>
 <input type="hidden" name="format" id="formatinput" value='""" + format + """'>
 <input type="submit" class="button" value="Retrieve Information">
 </p>
@@ -119,17 +124,17 @@ def pageHead():
 
 	return """Content-type: text/html; charset=UTF-8
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
 <title>""" + title + """</title>
-<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2010 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
-<meta name='description' content='A tool to create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
+<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2015 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
+<meta name='description' content='Create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
 .clear { clear:both; }
-#title { text-align:center; margin:2em 1em; }
+#title { text-align:center; margin:3em 1em; }
 p { margin: 0.5em 0em; }
 a { text-decoration: none; color: #00d; }
 a:hover { text-decoration: underline; color: #00f; }
@@ -141,7 +146,7 @@ p.crcg { font-style: italic; }
 form { display:block; margin: 1em; }
 form p { text-align:center; }
 form input { font-size: 121%; }
-form input.q { width: 60%; margin-bottom: 6px; }
+form input.q { width: 60%; margin-bottom: 1em; }
 form input.button { position:relative; bottom: 3px; }
 h2 { font-size: 121%; margin:2em 0em 1em 0em; position:relative; }
 h2:before { content: "\\002767"; position: absolute; width: 1em; left:-1em; font-size: 360%; color: #999; }
@@ -154,7 +159,7 @@ ul li { margin-bottom: 0.5em; }
 .format { display: none; }
 textarea { width:100%; }
 .warning { text-style: italic; font-style:italic; text-align:center; margin: 1em 0em; color: #900;}
-#foot { font-style:italic; text-align: center; margin: 3em 0em 1em 0em; border-top: #999 solid 1px; }
+#foot { font-size: 80%; font-style:italic; text-align: center; margin: 3em 0em 1em 0em; padding-top: 0.2em; border-top: #999 solid 1px; }
 </style>
 <script type="text/javascript">
 function showType(type) {
@@ -182,9 +187,6 @@ for (var i = 0; i < myTypes.length; i++) {
 <div id="page">
 <div id="title">
 <h1><a href="./">Retrieve arXiv Information</a></h1>
-<p class="crcg">
-<a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a>
-</p>
 </div>
 """ + theForm()
 
@@ -198,34 +200,49 @@ def extraInfo():
 	"""
 	return """
 <p>
-Use the form above to get information from your <a href="http://www.arxiv.org/">arXiv</a> submissions for use on the Courant Centre <a href="http://www.crcg.de/wiki/Publications">publications wiki page</a>. You can enter:
+Use the form above to get information for <a href="http://www.arxiv.org/">arXiv</a> submissions
+for use in BibTeX, on web pages or in Wikis. You can enter:
 </p>
 <ul>
 <li>
 <p>
-one or several <em>paper IDs</em> like “0909.4913” or “0506203”.
+one or several <em>paper IDs</em> like “1510.01797” or “math/0506203”.
 </p>
 </li><li>
 <p>
-your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em> looking similar to “courant_r_1” to get a list of all your submitted papers.
+your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em>
+looking similar to “courant_r_1” to get a list of all your submitted papers.
 </p><p>
-In case you do not have an arXiv author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>. To ensure completeness of the list created from that, please make sure that your co-authors correctly associated the paper to your arXiv account after submission.
-</p><p>
-Readymade links for <acronym title="Courant Research Centre Göttingen">CRCG</acronym> members:
-""" + memberLinks() + """.
-</p><p>
-Your name is missing in that list? <a href="http://arxiv.org/set_author_id">Get yourself an arXiv ID</a> and <a href="mailto:arXivToWiki@crcg.de?subject=My%20arXiv%20author%20ID">let us know</a>.
+In case you do not have an arXiv author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>.
+To ensure completeness of the list created from that, please make sure that your co-authors correctly associated
+the paper to your arXiv account after submission.
 </p>
+"""	+ personalisedBlock() + """
 </ul>
 <p>
 """
 
+
+def personalisedBlock():
+	"""
+		Creates a block with links for the people known by the tool for the start page.
+	"""
+	if isPersonalised:
+		return """
+<p>
+Convenience Links:
+""" + memberLinks() + """.
+</p>
+"""
+	return ""
 
 
 def memberLinks():
 	"""
 		Returns string with HTML containing links to look up all people with known arXiv author IDs.
 	"""
+	if not isPersonalised:
+		return ""
 
 	uniquemembers = dict()
 	for person in people.iteritems():
@@ -250,12 +267,10 @@ def pageFoot():
 		Returns string with HTML for the bottom of the page.
 	"""
 	foot = ["""<div id="foot">
-<a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘</a><br>
-<a href="http://www.uni-goettingen.de/en/20693.html">Mathematisches Institut</a>,
-<a href="http://www.uni-goettingen.de/en/1.html">Georg-August-Universität Göttingen</a><br>"""]
-	if (runningFromBibTeXPath() == True) or (runningFromHTMLPath() == True):
-		foot += ["""Data provided by the <a href="http://arxiv.org/help/api/index">arXiv API</a> · Site made by <a href="http://earthlingsoft.net/ssp/design/">Sven-S. Porst</a><br>"""]
-	foot += ["""<a href="http://www.besserweb.de/website.php?id=42">Leave a Comment</a>
+Created for <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘, Göttingen</a><br>"""]
+	foot += ["""Data from <a href="http://arxiv.org/help/api/index">arXiv API</a>
+· Site by <a href="http://earthlingsoft.net/ssp">Sven-S. Porst</a>
+· <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
 </div>
 </div>
 </body>
@@ -473,7 +488,7 @@ def errorMarkup(errorText):
 	"""
 	return """<h2 class="error">No results</h2>
 <p>""" + errorText + """</p>
-<p>If you think you entered a valid arXiv ID and you keep getting this error message, please accept our apologies and <a href="http://www.besserweb.de/website.php?id=42">let us know about it</a>.</p>
+<p>If you think you entered a valid arXiv ID and you keep getting this error message, please accept our apologies and <a href="https://github.com/ssp/arXivToWiki/issues">let me know</a>.</p>
 """
 
 
