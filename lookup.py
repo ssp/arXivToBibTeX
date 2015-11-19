@@ -81,14 +81,9 @@ aposRegexp = re.compile(r"'")
 def escapeHTML(inputString):
 	"""
 		Input: string
-		Output: input string with < > & ' replaced by their HTML character entities
+		Output: input string with < > & " replaced by their HTML character entities
 	"""
-	escapedString = ampRegexp.sub('&amp;', inputString)
-	escapedString = ltRegexp.sub('&lt;', escapedString)
-	escapedString = gtRegexp.sub('&gt;', escapedString)
-	escapedString = aposRegexp.sub('&#39;', escapedString)
-
-	return escapedString
+	return cgi.escape(inputString, True)
 
 
 
@@ -99,15 +94,15 @@ def theForm():
 		The form is pre-filled with the current query string.
 	"""
 	global format
-	return """
+	return '''
 <form method="get" action="./">
 <p>
-<input type="text" name="q" class="q" autofocus placeholder="1510.01797 or courant_r_1" value='""" + escapeHTML(queryString) + """'>
-<input type="hidden" name="format" id="formatinput" value='""" + format + """'>
+<input type="text" name="q" class="q" autofocus placeholder="1510.01797 or courant_r_1" value="''' + escapeHTML(queryString) + '''">
+<input type="hidden" name="format" id="formatinput" value="''' + escapeHTML(format) + '''">
 <input type="submit" class="button" value="Retrieve Information">
 </p>
 </form>
-"""
+'''
 
 
 
