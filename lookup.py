@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding=utf-8
 """
-arXivToWiki v5
+arXivToBibTeX / arXivToWiki v5
 ©2009-2015 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Originally created for Courant Research Centre
@@ -47,8 +47,8 @@ oldStyleIDRE = re.compile(r"[a-z-]*/\d\d\d\d\d\d\d$")
 def prepareArXivID(ID):
 	"""
 		first, strip potentially trailing version numbers like v4
-		0909.1234/1504.12345-style ID => return unchanged
-		09091234/159412345-style ID => return 0909.1234/1504.12345
+		0909.1234 or 1504.12345-style ID => return unchanged
+		09091234 or 159412345-style ID => return 0909.1234 or 1504.12345
 		0606123-style ID => return math/0606123
 		non-math/0606123-style ID => return unchanged
 		anything else => return None
