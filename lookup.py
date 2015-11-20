@@ -489,21 +489,19 @@ def errorMarkup(errorText):
 
 
 def runningFromBibTeXPath():
-	result = False;
-	if "REQUEST_URI" in os.environ:
-		if os.environ["REQUEST_URI"].lower().find("bibtex") != -1:
-			result = True
-	return result
-
+	return isInRequestURI("bibtex")
 
 def runningFromHTMLPath():
-	result = False;
-	if "REQUEST_URI" in os.environ:
-		if os.environ["REQUEST_URI"].lower().find("html") != -1:
-			result = True
-	return result
+	return isInRequestURI("html")
 
+def isInRequestURI(string):
+	return isInEnvironment("REQUEST_URI", string) or isInEnvironment("HTTP_HOST", string)
 
+def isInEnvironment(fieldName, string):
+	if fieldName in os.environ:
+		if os.environ[fieldName].lower().find(string) != -1:
+			return True
+	return False
 
 
 IDCleanerRE = re.compile(r"[^0-9]*([0-9]*)\.?([0-9]*)")
