@@ -112,9 +112,9 @@ def pageHead():
 	"""
 	global format
 	title = "arXiv To Wiki"
-	if runningFromBibTeXPath() == True:
+	if isRunningFromBibTeXURI():
 		title = "arXiv To BibTeX"
-	elif runningFromHTMLPath() == True:
+	elif isRunningFromHTMLURI():
 		title = "arXiv to HTML"
 
 	return """Content-type: text/html; charset=UTF-8
@@ -488,10 +488,10 @@ def errorMarkup(errorText):
 
 
 
-def runningFromBibTeXPath():
+def isRunningFromBibTeXURI():
 	return isInRequestURI("bibtex")
 
-def runningFromHTMLPath():
+def isRunningFromHTMLURI():
 	return isInRequestURI("html")
 
 def isInRequestURI(string):
@@ -545,9 +545,9 @@ if form.has_key("q"):
 		if match != None:
 			personID = match.string[match.start():match.end()]
 format = "wiki"
-if runningFromBibTeXPath() == True:
+if isRunningFromBibTeXURI():
 	format = "bibtex"
-elif runningFromHTMLPath() == True:
+elif isRunningFromHTMLURI():
 	format = "html"
 if form.has_key("format"):
 	f = form["format"].value
