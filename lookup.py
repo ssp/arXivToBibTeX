@@ -599,13 +599,13 @@ if form.has_key("q"):
 				if titleElement == None:
 					continue
 				theTitle = re.sub(r"\s*\n\s*", r" ", titleElement.text)
-
 				authors = paper.getiterator("{http://www.w3.org/2005/Atom}author")
 				theAuthors = []
 				for author in authors:
 					name = author.find("{http://www.w3.org/2005/Atom}name").text
 					theAuthors += [name]
 				theAbstract = paper.find("{http://www.w3.org/2005/Atom}summary").text.strip()
+				
 				links = paper.getiterator("{http://www.w3.org/2005/Atom}link")
 				thePDF = ""
 				theLink = ""
@@ -613,13 +613,14 @@ if form.has_key("q"):
 					attributes = link.attrib
 					if attributes.has_key("type"):
 						linktype = attributes["type"]
-					if linktype == "application/pdf":
-						thePDF = attributes["href"]
-					elif linktype == "text/html":
-						theLink = attributes["href"]
+						if linktype == "application/pdf":
+							thePDF = attributes["href"]
+						elif linktype == "text/html":
+							theLink = attributes["href"]
 				splitLink = theLink.split("/abs/")
 				theID = splitLink[-1].split('v')[0]
 				theLink = splitLink[0] + "/abs/" + theID
+
 				theYear = paper.find("{http://www.w3.org/2005/Atom}published").text.split('-')[0]
 				DOI = paper.find("{http://arxiv.org/schemas/atom}doi")
 				theDOI = None
@@ -633,10 +634,17 @@ if form.has_key("q"):
 					theJournal = journal.text
 					extraRows += 1
 
-				publicationDict = dict({"authors": theAuthors, "title": theTitle, "abstract": theAbstract, "PDF": thePDF, "link": theLink, "ID": theID, "year": theYear, "DOI": theDOI, "journal": theJournal})
-
+				publicationDict = dict({
+					"ID": theID,
+					"authors": theAuthors,
+					"title": theTitle,
+					"abstract": theAbstract,
+					"year": theYear,
+					"PDF": thePDF,
+					"link": theLink,
+					"DOI": theDOI,
+					"journal": theJournal})
 				publications += [publicationDict]
-
 
 			preprintIDs = []
 			preprints = []
@@ -652,7 +660,6 @@ if form.has_key("q"):
 				else:
 					preprints += [publication]
 					preprintIDs += [publication["ID"]]
-
 
 			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n",
 			"""<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""",
@@ -712,5 +719,4 @@ if form.has_key("q"):
 		print "".join(output)
 else:
 	print extraInfo()
-
 print pageFoot()
