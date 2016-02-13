@@ -1,8 +1,11 @@
 #!/usr/bin/python
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v5
-©2009-2015 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+arXivToBibTeX / arXivToWiki v6
+©2009-2016 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+
+Service available at: https://arxiv2bibtex.org
+Source code available at: https://github.com/ssp/arXivToBibTeX
 
 Originally created for Courant Research Centre
 ‘Higher Order Structures in Mathematics’ <http://crcg.de>
@@ -320,8 +323,11 @@ def basicMarkupForHTMLEditing(myDict, type):
 	if myDict["journal"] != None:
 		output += [", ", myDict["journal"]]
 	output += ["; <a href='",  myDict["link"], "'>arXiv:", myDict["ID"], "</a>."]
-	if myDict["DOI"] != None:
-		output += [" DOI: <a href='http://dx.doi.org/", myDict["DOI"], "'>", myDict["DOI"], "</a>."]
+	if myDict["DOI"] != None and len(myDict["DOI"]) > 0:
+		dois = []
+		for DOI in myDict["DOI"]:
+			dois += ["<a href='http://dx.doi.org/" + DOI + "'>" + DOI + "</a>"]
+		output += [" DOI: ", ", ".join(dois), "."]
 
 	return "".join(output)
 
@@ -380,10 +386,13 @@ def markupForWikiItem(myDict):
 
 	wikioutput = ["* ", ", ".join(wikiauthors), ': “', myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
-			wikioutput += [", ", myDict["journal"]]
+		wikioutput += [", ", myDict["journal"]]
 	wikioutput += ["; [", myDict["link"], " arXiv:", myDict["ID"], "]."]
-	if myDict["DOI"] != None:
-		wikioutput += [" DOI: [http://dx.doi.org/", myDict["DOI"], " ", myDict["DOI"], "]."]
+	if myDict["DOI"] != None and len(myDict["DOI"]) > 0 :
+		dois = []
+		for DOI in myDict["DOI"]:
+			dois += ["[http://dx.doi.org/" + DOI + " " + DOI + "]"]
+		wikioutput += [" DOI: ", ", ".join(dois) , "."]
 	result = "".join(wikioutput)
 	result = re.sub(r"\s+", r" ", result)
 	return result
@@ -422,8 +431,8 @@ def markupForBibTeXItem(myDict):
 	bibTeXEntry = ["@misc{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {arXiv:", bibTeXID, "},\n"]
 	if myDict["journal"] != None:
 		bibTeXEntry += ["Howpublished = {", myDict["journal"], "},\n"]
-	if myDict["DOI"] != None:
-		bibTeXEntry += ["Doi = {", myDict["DOI"], "},\n"]
+	if myDict["DOI"] != None and len(myDict["DOI"]) > 0:
+		bibTeXEntry += ["Doi = {", " ".join(myDict["DOI"]), "},\n"]
 	bibTeXEntry += ["}"]
 	result = "".join(bibTeXEntry)
 	return result
@@ -468,8 +477,8 @@ def markupForBibItem(myDict):
 	if myDict["journal"] != None:
 		bibItemCommand += [",\n\\newblock ", myDict["journal"]]
 	bibItemCommand += [";\n\\newblock arXiv:", bibTeXID, "."]
-	if myDict["DOI"] != None:
-		bibItemCommand += ["\n\\newblock DOI:", myDict["DOI"], "."]
+	if myDict["DOI"] != None and len(myDict["DOI"]) > 0:
+		bibItemCommand += ["\n\\newblock DOI: ", " ".join(myDict["DOI"]), "."]
 	result = "".join(bibItemCommand) + "\n"
 	return result
 
@@ -609,30 +618,28 @@ if form.has_key("q"):
 				links = paper.getiterator("{http://www.w3.org/2005/Atom}link")
 				thePDF = ""
 				theLink = ""
+				theDOIs = []
 				for link in links:
 					attributes = link.attrib
-					if attributes.has_key("type"):
-						linktype = attributes["type"]
-						if linktype == "application/pdf":
-							thePDF = attributes["href"]
-						elif linktype == "text/html":
-							theLink = attributes["href"]
+					if attributes.has_key("href"):
+						linktarget = attributes["href"]
+						linktype = attributes["type"] if attributes.has_key("type") else None
+						linktitle = attributes["title"] if attributes.has_key("title") else None
+					if linktype == "application/pdf":
+						thePDF = linktarget
+					elif linktype == "text/html":
+						theLink = linktarget
+					elif linktitle == "doi":
+						theDOIs += [linktarget]
 				splitLink = theLink.split("/abs/")
 				theID = splitLink[-1].split('v')[0]
 				theLink = splitLink[0] + "/abs/" + theID
 
 				theYear = paper.find("{http://www.w3.org/2005/Atom}published").text.split('-')[0]
-				DOI = paper.find("{http://arxiv.org/schemas/atom}doi")
-				theDOI = None
-				extraRows = 0
-				if DOI != None:
-					theDOI = DOI.text
-					extraRows += 1
 				journal = paper.find("{http://arxiv.org/schemas/atom}journal_ref")
 				theJournal = None
 				if journal != None:
 					theJournal = journal.text
-					extraRows += 1
 
 				publicationDict = dict({
 					"ID": theID,
@@ -642,7 +649,7 @@ if form.has_key("q"):
 					"year": theYear,
 					"PDF": thePDF,
 					"link": theLink,
-					"DOI": theDOI,
+					"DOI": theDOIs,
 					"journal": theJournal})
 				publications += [publicationDict]
 
