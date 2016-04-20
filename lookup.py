@@ -95,9 +95,9 @@ def theForm():
 	return '''
 <form method="get" action="./">
 <p>
-<input type="text" name="q" class="q" autofocus placeholder="1510.01797 or courant_r_1" value="''' + escapeHTML(queryString) + '''">
-<input type="hidden" name="format" id="formatinput" value="''' + escapeHTML(format) + '''">
-<input type="submit" class="button" value="Retrieve Information">
+<input type="text" name="q" class="q" autofocus="autofocus" placeholder="1510.01797 or courant_r_1" value="''' + escapeHTML(queryString) + '''"/>
+<input type="hidden" name="format" id="formatinput" value="''' + escapeHTML(format) + '''"/>
+<input type="submit" class="button" value="Retrieve Information"/>
 </p>
 </form>
 '''
@@ -121,8 +121,8 @@ def pageHead():
 <html>
 <head>
 <title>""" + title + """</title>
-<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2015 by Sven-S. Porst (ssp-web@earthlingsoft.net).'>
-<meta name='description' content='Create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'>
+<meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2015 by Sven-S. Porst (ssp-web@earthlingsoft.net).'/>
+<meta name='description' content='Create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'/>
 <style type="text/css">
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
@@ -155,6 +155,7 @@ textarea { width:100%; }
 #foot { font-size: 80%; font-style:italic; text-align: center; margin: 3em 0em 1em 0em; padding-top: 0.2em; border-top: #999 solid 1px; }
 </style>
 <script type="text/javascript">
+//<![CDATA[
 function showType(type) {
 var myType = type;
 if (type != "wiki" && type != "bibtex" && type != "bibitem" && type != "html") { myType = "wiki"; }
@@ -174,6 +175,7 @@ for (var i = 0; i < myTypes.length; i++) {
 	}
 }
 }
+//]]>
 </script>
 </head>
 <body onload="javascript:showType('""" + format + """');">
@@ -260,7 +262,7 @@ def pageFoot():
 		Returns string with HTML for the bottom of the page.
 	"""
 	foot = ["""<div id="foot">
-Created for <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘, Göttingen</a><br>"""]
+Created for <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘, Göttingen</a><br/>"""]
 	foot += ["""Data from <a href="http://arxiv.org/help/api/index">arXiv API</a>
 · Site by <a href="http://earthlingsoft.net/ssp">Sven-S. Porst</a>
 · <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
@@ -348,7 +350,7 @@ def wikiMarkup(items, type):
 		factor = 3
 		if type == "Published":
 			factor = 4
-		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</ul>\n", "<p class='clear'>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
+		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</li></ul>\n", "<p class='clear'>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
 	return markup
 
 
@@ -609,7 +611,7 @@ if form.has_key("q"):
 					name = author.find("{http://www.w3.org/2005/Atom}name").text
 					theAuthors += [name]
 				theAbstract = paper.find("{http://www.w3.org/2005/Atom}summary").text.strip()
-				
+
 				links = paper.getiterator("{http://www.w3.org/2005/Atom}link")
 				thePDF = ""
 				theLink = ""
@@ -664,16 +666,16 @@ if form.has_key("q"):
 					preprintIDs += [publication["ID"]]
 
 			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n",
-			"""<li><a href='javascript:showType("wiki");' id='wiki-link' href='#'>Wiki</a></li>\n""",
-			"""<li><a href='javascript:showType("html");' id='html-link' href='#'>HTML</a></li>\n""",
-			"""<li><a onclick='javascript:showType("bibtex");' id='bibtex-link' href='#'>BibTeX</a></li>\n""",
-			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link' href='#'>\\bibitem</a></li>\n""",
+			"""<li><a href='javascript:showType("wiki");' id='wiki-link'>Wiki</a></li>\n""",
+			"""<li><a href='javascript:showType("html");' id='html-link'>HTML</a></li>\n""",
+			"""<li><a href='javascript:showType("bibtex");' id='bibtex-link'>BibTeX</a></li>\n""",
+			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link'>\\bibitem</a></li>\n""",
 			"</ul>\n</div>\n"]
 
 			if len(papers) >= maxpapers:
 				output += ["<div class='warning'>We can only process " + str(maxpapers) + " paper IDs at a time. " + str(len(papers) - maxpapers) + " of the IDs you entered were ignored.</div>"]
 
-			journalrefnote = """<p><em>Please <a class="editlink" href="http://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <acronym title="Document Object Identifier">DOI</acronym> for your papers as soon as they are published</a>.</em></p>"""
+			journalrefnote = """<p><em>Please <a class="editlink" href="http://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <abbr title="Document Object Identifier">DOI</abbr> for your papers as soon as they are published</a>.</em></p>"""
 
 			output += ["<div id='wiki'>\n"]
 			if len(preprints) > 0:
