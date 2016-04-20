@@ -157,23 +157,21 @@ textarea { width:100%; }
 <script type="text/javascript">
 //<![CDATA[
 function showType(type) {
-var myType = type;
-if (type != "wiki" && type != "bibtex" && type != "bibitem" && type != "html") { myType = "wiki"; }
-var myTypes = new Array("wiki", "bibtex", "bibitem", "html");
-document.getElementById("formatinput").value = myType;
-var name;
-for (var i = 0; i < myTypes.length; i++) {
-	var name = myTypes[i]
-	var linkID = name.concat("-link");
-	if (name == myType) {
-		document.getElementById(name).style.display = "block";
-		document.getElementById(linkID).style.fontWeight = "bold";
+	var myTypes = ["bibtex", "biblatex", "bibitem", "html", "wiki"];
+	var myType = (!type || myTypes.indexOf(type) == -1) ? "wiki" : type;
+	document.getElementById("formatinput").value = myType;
+	for (var i = 0; i < myTypes.length; i++) {
+		var name = myTypes[i]
+		var linkID = name.concat("-link");
+		if (name == myType) {
+			document.getElementById(name).style.display = "block";
+			document.getElementById(linkID).style.fontWeight = "bold";
+		}
+		else {
+			document.getElementById(name).style.display = "none";
+			document.getElementById(linkID).style.fontWeight = "normal";
+		}
 	}
-	else {
-		document.getElementById(name).style.display = "none";
-		document.getElementById(linkID).style.fontWeight = "normal";
-	}
-}
 }
 //]]>
 </script>
@@ -350,7 +348,7 @@ def wikiMarkup(items, type):
 		factor = 3
 		if type == "Published":
 			factor = 4
-		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</li></ul>\n", "<p class='clear'>Copy and paste the text below for the wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
+		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</li></ul>\n", "<p class='clear'>For copy and pasting to a Wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
 	return markup
 
 
@@ -397,7 +395,7 @@ def markupForWikiItem(myDict):
 
 
 
-def bibTeXMarkup(items):
+def bibTeXMarkup(items, format):
 	"""
 		Input: List of publication dictionaries.
 		Output: Array of strings containing HTML markup with a heading and a textarea full of BibTeX records.
@@ -407,7 +405,7 @@ def bibTeXMarkup(items):
 		linecount = 0
 		itemmarkup = []
 		for item in items:
-			bibtexmarkup = markupForBibTeXItem(item)
+			bibtexmarkup = markupForBibTeXItem(item, format)
 			itemmarkup += [bibtexmarkup]
 			linecount += len(bibtexmarkup.split('\n'))
 		markup += ["<textarea class='wikiinfo' cols='70' rows='", str(linecount + len(items) - 1), "'>\n", "\n\n".join(itemmarkup), "</textarea>\n"]
@@ -415,7 +413,7 @@ def bibTeXMarkup(items):
 
 
 
-def markupForBibTeXItem(myDict):
+def markupForBibTeXItem(myDict, format):
 	"""
 		Input: dictionary with publication data.
 		Output: BibTeX record for the preprint.
@@ -425,10 +423,19 @@ def markupForBibTeXItem(myDict):
 	bibTeXTitle = myDict["title"]
 	bibTeXYear = myDict["year"]
 
-	bibTeXEntry = ["@misc{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {arXiv:", bibTeXID, "},\n"]
-	if myDict["journal"] != None:
+	hasDOI = myDict["DOI"] != None and len(myDict["DOI"]) > 0
+	hasJournal = myDict["journal"] != None
+	isPublished = hasJournal or hasDOI
+
+	publicationType = ("@online" if format == "biblatex" else "@misc") if not isPublished else "@article"
+
+	eprintPrefix = "" if format == "biblatex" else "arXiv:"
+	bibTeXEntry = [publicationType, "{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {", eprintPrefix, bibTeXID, "},\n"]
+	if format == "biblatex":
+		bibTeXEntry += ["Eprinttype = {arXiv},\n"]
+	if isPublished:
 		bibTeXEntry += ["Howpublished = {", myDict["journal"], "},\n"]
-	if myDict["DOI"] != None and len(myDict["DOI"]) > 0:
+	if hasDOI:
 		bibTeXEntry += ["Doi = {", " ".join(myDict["DOI"]), "},\n"]
 	bibTeXEntry += ["}"]
 	result = "".join(bibTeXEntry)
@@ -666,10 +673,11 @@ if form.has_key("q"):
 					preprintIDs += [publication["ID"]]
 
 			output += ["<div class='formatpicker'>Format:<ul class='outputtypes'>\n",
-			"""<li><a href='javascript:showType("wiki");' id='wiki-link'>Wiki</a></li>\n""",
-			"""<li><a href='javascript:showType("html");' id='html-link'>HTML</a></li>\n""",
 			"""<li><a href='javascript:showType("bibtex");' id='bibtex-link'>BibTeX</a></li>\n""",
+			"""<li><a href='javascript:showType("biblatex");' id='biblatex-link'>BibLaTeX</a></li>\n""",
 			"""<li><a href='javascript:showType("bibitem");' id='bibitem-link'>\\bibitem</a></li>\n""",
+			"""<li><a href='javascript:showType("html");' id='html-link'>HTML</a></li>\n""",
+			"""<li><a href='javascript:showType("wiki");' id='wiki-link'>Wiki</a></li>\n""",
 			"</ul>\n</div>\n"]
 
 			if len(papers) >= maxpapers:
@@ -677,13 +685,33 @@ if form.has_key("q"):
 
 			journalrefnote = """<p><em>Please <a class="editlink" href="http://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <abbr title="Document Object Identifier">DOI</abbr> for your papers as soon as they are published</a>.</em></p>"""
 
-			output += ["<div id='wiki'>\n"]
+			output += ["<div id='bibtex'>\n"]
 			if len(preprints) > 0:
 				output += ["<h2>Preprints:</h2>\n", journalrefnote]
-				output += wikiMarkup(preprints, "Preprint")
+				output += bibTeXMarkup(preprints, "bibtex")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
-				output += wikiMarkup(published, "Published")
+				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
+				output += bibTeXMarkup(published, "bibtex")
+			output += ["</div>\n"]
+
+			output += ["<div id='biblatex'>\n"]
+			if len(preprints) > 0:
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
+				output += bibTeXMarkup(preprints, "biblatex")
+			if len(published) > 0:
+				output += ["<h2>Published:</h2>\n"]
+				output += ["""<p>These BibLaTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
+				output += bibTeXMarkup(published, "biblatex")
+			output += ["</div>\n"]
+
+			output += ["<div id='bibitem'>\n"]
+			if len(preprints) > 0:
+				output += ["<h2>Preprints:</h2>\n", journalrefnote]
+				output += bibItemMarkup(preprints)
+			if len(published) > 0:
+				output += ["<h2>Published:</h2>\n"]
+				output += bibItemMarkup(published)
 			output += ["</div>\n"]
 
 			output += ["<div id='html'>\n"]
@@ -695,24 +723,15 @@ if form.has_key("q"):
 				output += htmlMarkup(published, "Published")
 			output += ["</div>\n"]
 
-			output += ["<div id='bibtex'>\n"]
+			output += ["<div id='wiki'>\n"]
 			if len(preprints) > 0:
 				output += ["<h2>Preprints:</h2>\n", journalrefnote]
-				output += bibTeXMarkup(preprints)
+				output += wikiMarkup(preprints, "Preprint")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
-				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
-				output += bibTeXMarkup(published)
+				output += wikiMarkup(published, "Published")
 			output += ["</div>\n"]
 
-			output += ["<div id='bibitem'>\n"]
-			if len(preprints) > 0:
-				output += ["<h2>Preprints:</h2>\n", journalrefnote]
-				output += bibItemMarkup(preprints)
-			if len(published) > 0:
-				output += ["<h2>Published:</h2>\n"]
-				output += bibItemMarkup(published)
-			output += ["</div>\n"]
 
 		if len(failedIDs) > 0:
 			if len(failedIDs) == 1:
