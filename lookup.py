@@ -622,7 +622,6 @@ if form.has_key("q"):
 				links = paper.getiterator("{http://www.w3.org/2005/Atom}link")
 				thePDF = ""
 				theLink = ""
-				theDOIs = []
 				for link in links:
 					attributes = link.attrib
 					if attributes.has_key("href"):
@@ -633,13 +632,17 @@ if form.has_key("q"):
 						thePDF = linktarget
 					elif linktype == "text/html":
 						theLink = linktarget
-					elif linktitle == "doi":
-						theDOIs += [linktarget]
 				splitLink = theLink.split("/abs/")
 				theID = splitLink[-1].split('v')[0]
 				theLink = splitLink[0] + "/abs/" + theID
 
 				theYear = paper.find("{http://www.w3.org/2005/Atom}published").text.split('-')[0]
+
+				theDOIs = []
+				DOIs = paper.getiterator("{http://arxiv.org/schemas/atom}doi")
+				for DOI in DOIs:
+					theDOIs += [DOI.text]
+
 				journal = paper.find("{http://arxiv.org/schemas/atom}journal_ref")
 				theJournal = None
 				if journal != None:
