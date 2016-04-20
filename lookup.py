@@ -76,11 +76,6 @@ def prepareArXivID(ID):
 
 
 
-ampRegexp = re.compile(r"&")
-ltRegexp = re.compile(r"<")
-gtRegexp = re.compile(r">")
-aposRegexp = re.compile(r"'")
-
 def escapeHTML(inputString):
 	"""
 		Input: string
