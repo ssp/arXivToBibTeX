@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v6
+arXivToBibTeX / arXivToWiki v6.1
 ©2009-2016 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Service available at: https://arxiv2bibtex.org
@@ -433,7 +433,7 @@ def markupForBibTeXItem(myDict, format):
 	bibTeXEntry = [publicationType, "{", bibTeXID, ",\nAuthor = {", bibTeXAuthors, "},\nTitle = {", bibTeXTitle, "},\nYear = {", bibTeXYear, "},\nEprint = {", eprintPrefix, bibTeXID, "},\n"]
 	if format == "biblatex":
 		bibTeXEntry += ["Eprinttype = {arXiv},\n"]
-	if isPublished:
+	if hasJournal:
 		bibTeXEntry += ["Howpublished = {", myDict["journal"], "},\n"]
 	if hasDOI:
 		bibTeXEntry += ["Doi = {", " ".join(myDict["DOI"]), "},\n"]
