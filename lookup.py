@@ -1,8 +1,8 @@
 #!/usr/bin/python
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v6.1
-©2009-2016 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+arXivToBibTeX / arXivToWiki v6.2
+©2009-2017 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Service available at: https://arxiv2bibtex.org
 Source code available at: https://github.com/ssp/arXivToBibTeX
@@ -21,6 +21,7 @@ redirected to the script.
 import cgi
 import re
 import urllib
+from urlparse import urlparse
 from xml.etree import ElementTree
 import xml.etree
 import os
@@ -554,9 +555,18 @@ if form.has_key("q"):
 	papers = list(set(re.sub(r",", r" ", queryString).split()))
 	""" for a single entry matching a regex we have an autor ID"""
 	if len(papers) == 1:
-		match = re.search(r"[a-z]*_[a-z]_[0-9]*", papers[0])
-		if match != None:
-			personID = match.string[match.start():match.end()]
+		authorMatch = re.search(r"[a-z]*_[a-z]_[0-9]*", papers[0])
+		if authorMatch != None:
+			personID = authorMatch.string[authorMatch.start():authorMatch.end()]
+		urlParts = urlparse(queryString)
+		if urlParts.netloc == "arxiv.org":
+			"""An arXiv URL was entered, extract the last component(s) as the paper ID"""
+			"""Match both old math.ph/9902123 and new 1705.12345 style path segments"""
+			IDRegex = r"([^\/]+/\d{7}|\d{4}\.\d{4,})$" 
+			paperIDMatch = re.search(IDRegex, urlParts.path)
+			if paperIDMatch != None:
+				papers = [paperIDMatch.string[paperIDMatch.start():paperIDMatch.end()]]
+
 format = "wiki"
 if isRunningFromBibTeXURI():
 	format = "bibtex"
