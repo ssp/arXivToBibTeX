@@ -1,14 +1,15 @@
 #!/usr/bin/python
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v6.2
+arXivToBibTeX / arXivToWiki v6.3
 ©2009-2017 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Service available at: https://arxiv2bibtex.org
 Source code available at: https://github.com/ssp/arXivToBibTeX
 
 Originally created for Courant Research Centre
-‘Higher Order Structures in Mathematics’ <http://crcg.de>
+‘Higher Order Structures in Mathematics’ at the
+Mathematics Institute at the University of Göttingen.
 
 Links for form submission refer to the folder of the current path without a
 further filename:
@@ -136,7 +137,6 @@ a:visited { color: #606; }
 a.editlink { color: #b00;}
 h1 { font-size: 144%; margin: 0.5em;}
 a h1 { color: #000; }
-p.crcg { font-style: italic; }
 form { display:block; margin: 1em; }
 form p { text-align:center; }
 form input { font-size: 121%; }
@@ -260,17 +260,15 @@ def pageFoot():
 	"""
 		Returns string with HTML for the bottom of the page.
 	"""
-	foot = ["""<div id="foot">
-Created for <a href="http://www.crcg.de/">Courant Research Centre ,Higher Order Structures in Mathematics‘, Göttingen</a><br/>"""]
-	foot += ["""Data from <a href="http://arxiv.org/help/api/index">arXiv API</a>
-· Site by <a href="http://earthlingsoft.net/ssp">Sven-S. Porst</a>
-· <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
+	return """<div id="foot">
+	Data from <a href="http://arxiv.org/help/api/index">arXiv API</a>
+	· Site by <a href="http://earthlingsoft.net/ssp">Sven-S. Porst</a>
+	· <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
 </div>
 </div>
 </body>
 </html>
-"""]
-	return "".join(foot)
+"""
 
 
 
@@ -355,8 +353,6 @@ def wikiMarkup(items, type):
 
 
 
-wikiAddressRE = re.compile(r"http://www.crcg.de/wiki/(User:.*)")
-
 def markupForWikiItem(myDict):
 	"""
 		Input: dictionary with publication data.
@@ -369,12 +365,7 @@ def markupForWikiItem(myDict):
 			record = people[author]
 			if record.has_key(URL):
 				address = record[URL]
-				match = wikiAddressRE.match(address)
-				if match != None:
-					address = match.group(1)
-					wikiauthors += ["[[" + address + "|" + author + "]]"]
-				else:
-					wikiauthors += ["[" + address + " " + author + "]"]
+				wikiauthors += ["[" + address + " " + author + "]"]
 			else:
 				wikiauthors += [author]
 		else:
