@@ -562,10 +562,10 @@ if form.has_key("q"):
 		if urlParts.netloc == "arxiv.org":
 			"""An arXiv URL was entered, extract the last component(s) as the paper ID"""
 			"""Match both old math.ph/9902123 and new 1705.12345 style path segments"""
-			IDRegex = r"([^\/]+/\d{7}|\d{4}\.\d{4,})$" 
+			IDRegex = r"[^\/]+/(\d{7}|\d{4}\.\d{4,})"
 			paperIDMatch = re.search(IDRegex, urlParts.path)
 			if paperIDMatch != None:
-				papers = [paperIDMatch.string[paperIDMatch.start():paperIDMatch.end()]]
+				papers = [paperIDMatch.string[paperIDMatch.start(1):paperIDMatch.end(1)]]
 
 format = "wiki"
 if isRunningFromBibTeXURI():
