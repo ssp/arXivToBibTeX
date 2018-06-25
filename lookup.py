@@ -230,16 +230,17 @@ one or several <em>paper IDs</em> like “1510.01797” or “math/0506203”.
 </p>
 </li><li>
 <p>
-your arXiv <em><a href="https://arxiv.org/help/author_identifiers">author ID</a></em>
-looking similar to “courant_r_1” to get a list of all your submitted papers.
+your <a href="https://arxiv.org/help/author_identifiers">arXiv <em>author ID</em></a>
+looking similar to “grafvbothmer_h_1” to get a list of all your submitted papers.
 </p>
-</li><p>
-In case you do not have an arXiv author ID yet, go and <a href="https://arxiv.org/set_author_id">get one now</a>.
-To ensure completeness of the list created from that, please make sure that your co-authors correctly associated
-the paper to your arXiv account after submission.
-</p>
-</ul>
+</li>
+<li>
 <p>
+your <a href="https://orcid.org">ORCID ID</a> looking similar to “0000-0003-0136-444X”
+which you should register with your arXiv-account.
+</p>
+</li>
+</ul>
 """
 
 
@@ -502,8 +503,6 @@ def comparePaperDictionaries (firstPaper, secondPaper):
 
 
 
-
-
 """
 	MAIN SCRIPT *****************************************************************
 """
@@ -515,9 +514,14 @@ personID = ""
 if form.has_key("q"):
 	queryString = form["q"].value
 	papers = list(set(re.sub(r",", r" ", queryString).split()))
-	""" for a single entry matching a regex we have an autor ID"""
+	""" 
+		for a single entry matching a regex we have an arXiv or ORCID autor ID
+		see https://arxiv.org/help/author_identifiers
+	"""
 	if len(papers) == 1:
-		authorMatch = re.search(r"[a-z]*_[a-z]_[0-9]*", papers[0])
+		arxivAuthorIDRegex = r"([a-z]*_[a-z]_[0-9]*)"
+		orcidIDRegex = r"((https://orcid.org/)?\d\d\d\d-\d\d\d\d-\d\d\d\d-\d\d\d[0-9X])"
+		authorMatch = re.search(arxivAuthorIDRegex + "|" + orcidIDRegex, papers[0])
 		if authorMatch != None:
 			personID = authorMatch.string[authorMatch.start():authorMatch.end()]
 		urlParts = urlparse(queryString)
