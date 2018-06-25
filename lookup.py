@@ -230,7 +230,7 @@ def extraInfo():
 	"""
 	return """
 <p>
-Use the form above to get information for <a href="http://www.arxiv.org/">arXiv</a> submissions
+Use the form above to get information for <a href="https://www.arxiv.org/">arXiv</a> submissions
 for use in BibTeX, on web pages or in Wikis. You can enter:
 </p>
 <ul>
@@ -240,10 +240,10 @@ one or several <em>paper IDs</em> like “1510.01797” or “math/0506203”.
 </p>
 </li><li>
 <p>
-your arXiv <em><a href="http://arxiv.org/help/author_identifiers">author ID</a></em>
+your arXiv <em><a href="https://arxiv.org/help/author_identifiers">author ID</a></em>
 looking similar to “courant_r_1” to get a list of all your submitted papers.
 </p><p>
-In case you do not have an arXiv author ID yet, go and <a href="http://arxiv.org/set_author_id">get one now</a>.
+In case you do not have an arXiv author ID yet, go and <a href="https://arxiv.org/set_author_id">get one now</a>.
 To ensure completeness of the list created from that, please make sure that your co-authors correctly associated
 the paper to your arXiv account after submission.
 </p>
@@ -297,8 +297,8 @@ def pageFoot():
 		Returns string with HTML for the bottom of the page.
 	"""
 	return """<div id="foot">
-	Data from <a href="http://arxiv.org/help/api/index">arXiv API</a>
-	· Site by <a href="http://earthlingsoft.net/ssp">Sven-S. Porst</a>
+	Data from <a href="https://arxiv.org/help/api/index">arXiv API</a>
+	· Site by <a href="https://earthlingsoft.net/ssp">Sven-S. Porst</a>
 	· <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
 </div>
 </div>
@@ -355,7 +355,7 @@ def basicMarkupForHTMLEditing(myDict):
 	if myDict["DOI"] != None and len(myDict["DOI"]) > 0:
 		dois = []
 		for DOI in myDict["DOI"]:
-			dois += ["<a href='http://dx.doi.org/" + DOI + "'>" + DOI + "</a>"]
+			dois += ["<a href='https://dx.doi.org/" + DOI + "'>" + DOI + "</a>"]
 		output += [" DOI: ", ", ".join(dois), "."]
 
 	return "".join(output)
@@ -413,7 +413,7 @@ def markupForWikiItem(myDict):
 	if myDict["DOI"] != None and len(myDict["DOI"]) > 0 :
 		dois = []
 		for DOI in myDict["DOI"]:
-			dois += ["[http://dx.doi.org/" + DOI + " " + DOI + "]"]
+			dois += ["[https://dx.doi.org/" + DOI + " " + DOI + "]"]
 		wikioutput += [" DOI: ", ", ".join(dois) , "."]
 	result = "".join(wikioutput)
 	result = re.sub(r"\s+", r" ", result)
@@ -621,9 +621,9 @@ if form.has_key("q"):
 				arXivIDs += [processedID]
 			else:
 				failedIDs += [paperID]
-		arXivURL = "http://export.arxiv.org/api/query?id_list=" + ",".join(arXivIDs) + "&max_results=" + str(maxpapers)
+		arXivURL = "https://export.arxiv.org/api/query?id_list=" + ",".join(arXivIDs) + "&max_results=" + str(maxpapers)
 	else:
-		arXivURL = "http://arxiv.org/a/" + personID + ".atom"
+		arXivURL = "https://arxiv.org/a/" + personID + ".atom"
 
 	download = urllib.urlopen(arXivURL)
 	download.encoding = "UTF-8"
@@ -729,7 +729,7 @@ if form.has_key("q"):
 			if len(papers) >= maxpapers:
 				output += ["<div class='warning'>We can only process " + str(maxpapers) + " paper IDs at a time. " + str(len(papers) - maxpapers) + " of the IDs you entered were ignored.</div>"]
 
-			journalrefnote = """<p><em>Please <a class="editlink" href="http://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <abbr title="Document Object Identifier">DOI</abbr> for your papers as soon as they are published</a>.</em></p>"""
+			journalrefnote = """<p><em>Please <a class="editlink" href="https://arxiv.org/user/" title="Go to arXiv user page where you can edit the information stored for your papers.">add the journal reference and <abbr title="Document Object Identifier">DOI</abbr> for your papers as soon as they are published</a>.</em></p>"""
 
 			output += ["<div id='bibtex'>\n"]
 			if len(preprints) > 0:
@@ -737,7 +737,7 @@ if form.has_key("q"):
 				output += bibTeXMarkup(preprints, "bibtex")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
-				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
+				output += ["""<p>These BibTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="https://mathscinet.ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
 				output += bibTeXMarkup(published, "bibtex")
 			output += ["</div>\n"]
 
@@ -747,7 +747,7 @@ if form.has_key("q"):
 				output += bibTeXMarkup(preprints, "biblatex")
 			if len(published) > 0:
 				output += ["<h2>Published:</h2>\n"]
-				output += ["""<p>These BibLaTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="http://ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
+				output += ["""<p>These BibLaTeX records are based on arXiv information only. You may prefer getting the more detailed records provided by <a href="https://mathscinet.ams.org/mathscinet/">MathSciNet</a> instead.</p>\n"""]
 				output += bibTeXMarkup(published, "biblatex")
 			output += ["</div>\n"]
 
