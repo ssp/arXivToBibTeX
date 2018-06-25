@@ -146,12 +146,12 @@ def pageHead(format, outputformat):
 		return """Content-type: text/html; charset=UTF-8
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>""" + title + """</title>
 <meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2015 by Sven-S. Porst (ssp-web@earthlingsoft.net).'/>
 <meta name='description' content='Create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'/>
-<style type="text/css">
+<style>
 * { margin: 0em; padding: 0em; }
 body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
 .clear { clear:both; }
@@ -175,22 +175,22 @@ ul { padding-left: 2em; }
 ul li { margin-bottom: 0.5em; }
 .formatpicker { text-align: right; margin:1em 0em -1em 0em; }
 .formatpicker ul { display: inline; list-style-type: none; padding: 0px; }
-.formatpicker ul li { display: inline; margin-left: 0.5em; font-width: normal; padding: 0em; }
+.formatpicker ul li { display: inline; margin-left: 0.5em; font-weight: normal; padding: 0em; }
 .format { display: none; }
 textarea { width:100%; }
-.warning { text-style: italic; font-style:italic; text-align:center; margin: 1em 0em; color: #900;}
+.warning { font-style:italic; text-align:center; margin: 1em 0em; color: #900;}
 #foot { font-size: 80%; font-style:italic; text-align: center; margin: 3em 0em 1em 0em; padding-top: 0.2em; border-top: #999 solid 1px; }
 </style>
-<script type="text/javascript">
+<script>
 //<![CDATA[
 function showType(type) {
 	var myTypes = ["bibtex", "biblatex", "bibitem", "html", "wiki"];
-	var myType = (!type || myTypes.indexOf(type) == -1) ? "wiki" : type;
+	var myType = (!type || myTypes.indexOf(type) === -1) ? "wiki" : type;
 	document.getElementById("formatinput").value = myType;
 	for (var i = 0; i < myTypes.length; i++) {
 		var name = myTypes[i]
 		var linkID = name.concat("-link");
-		if (name == myType) {
+		if (name === myType) {
 			document.getElementById(name).style.display = "block";
 			document.getElementById(linkID).style.fontWeight = "bold";
 		}
