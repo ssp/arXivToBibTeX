@@ -77,6 +77,31 @@ def prepareArXivID(ID):
 
 
 
+def printAll(output):
+	print output
+
+
+
+def printHtml(html, outputformat):
+	if outputformat == "html":
+		print html
+
+
+
+
+def printPublicationsRaw(publications, format, outputformat):
+	if outputformat == "raw":
+		if format == "html":
+			print "\n\n".join(map(lambda publication: basicMarkupForHTMLEditing(publication), publications))
+		elif format == "bibtex" or format == "biblatex":
+			print "\n\n".join(map(lambda publication: markupForBibTeXItem(publication, format), publications))
+		elif format == "bibitem":
+			print "\n\n".join(map(lambda publication: markupForBibItem(publication), publications))
+		elif format == "wiki":
+			print "\n".join(map(lambda publication: markupForWikiItem(publication), publications))
+
+
+
 
 def escapeHTML(inputString):
 	"""
@@ -84,7 +109,6 @@ def escapeHTML(inputString):
 		Output: input string with < > & " replaced by their HTML character entities
 	"""
 	return cgi.escape(inputString, True)
-
 
 
 
@@ -106,18 +130,30 @@ def theForm():
 
 
 
-def pageHead():
+def outputformatToMimeType(outputformat):
+	if outputformat == "html":
+		return "text/html"
+	elif outputformat == "bibtex" or outputformat == "biblatex":
+		return "application/x-bibtex"
+	else:
+		return "text/plain"
+
+
+
+def pageHead(format, outputformat):
 	"""
 		Returns string with HTML for the http header and the top of the HTML markup including CSS and JavaScript.
 	"""
-	global format
-	title = "arXiv To Wiki"
-	if isRunningFromBibTeXURI():
-		title = "arXiv To BibTeX"
-	elif isRunningFromHTMLURI():
-		title = "arXiv to HTML"
+	if outputformat == "raw":
+		return "Content-type: " + outputformatToMimeType(outputformat) + "; charset=UTF-8\n"
+	else:
+		title = "arXiv To Wiki"
+		if isRunningFromBibTeXURI():
+			title = "arXiv To BibTeX"
+		elif isRunningFromHTMLURI():
+			title = "arXiv to HTML"
 
-	return """Content-type: text/html; charset=UTF-8
+		return """Content-type: text/html; charset=UTF-8
 
 <!DOCTYPE html>
 <html>
@@ -276,7 +312,7 @@ def pageFoot():
 def htmlMarkup(items, type):
 	"""
 		Input: items - List of publication dictionaries.
-		       type  - "Preprint" or "Publication".
+		       type  - "Preprint" or "Published".
 		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information in HTML markup.
 	"""
 	markup = []
@@ -284,7 +320,7 @@ def htmlMarkup(items, type):
 
 		htmlMarkup = ["<ul>\n"]
 		for item in items:
-			htmlMarkup += ["<li>\n", escapeHTML(basicMarkupForHTMLEditing(item, type)), "\n</li>"]
+			htmlMarkup += ["<li>\n", escapeHTML(basicMarkupForHTMLEditing(item)), "\n</li>"]
 		htmlMarkup += ["\n</ul>"]
 		factor = 4
 		if type == "Published":
@@ -295,10 +331,9 @@ def htmlMarkup(items, type):
 
 
 
-def basicMarkupForHTMLEditing(myDict, type):
+def basicMarkupForHTMLEditing(myDict):
 	"""
 		Input: myDict - dictionary with publication data.
-		       type   - "Preprint" or "Publication".
 		Output: String with HTML markup for publication data.
 	"""
 	authors = myDict["authors"]
@@ -341,7 +376,7 @@ def wikiMarkup(items, type):
 		htmlMarkup = []
 		for item in items:
 			wikiMarkup += [markupForWikiItem(item), "\n\n"]
-			htmlMarkup += [basicMarkupForHTMLEditing(item, type)]
+			htmlMarkup += [basicMarkupForHTMLEditing(item)]
 
 		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
@@ -558,6 +593,12 @@ if form.has_key("q"):
 			if paperIDMatch != None:
 				papers = [paperIDMatch.string[paperIDMatch.start(1):paperIDMatch.end(1)]]
 
+outputformat = "html"
+if form.has_key("outputformat"):
+	of = form["outputformat"].value
+	if of in ["html", "raw"]:
+		outputformat = of
+
 format = "wiki"
 if isRunningFromBibTeXURI():
 	format = "bibtex"
@@ -565,9 +606,10 @@ elif isRunningFromHTMLURI():
 	format = "html"
 if form.has_key("format"):
 	f = form["format"].value
-	if f in ["wiki", "bibtex", "bibitem", "html"]:
+	if f in ["wiki", "bibtex", "biblatex", "bibitem", "html"]:
 		format = f
-print pageHead()
+
+printAll(pageHead(format, outputformat))
 
 if form.has_key("q"):
 	failedIDs = []
@@ -587,8 +629,8 @@ if form.has_key("q"):
 	download.encoding = "UTF-8"
 	downloadedData = download.read()
 	if downloadedData == None:
-		print extraInfo()
-		print errorMarkup("The arXiv data could not be retrieved.")
+		printHtml(extraInfo(), outputformat)
+		printHtml(errorMarkup("The arXiv data could not be retrieved."), outputformat)
 	else:
 		publications = []
 		feed = xml.etree.ElementTree.fromstring(downloadedData)
@@ -603,8 +645,8 @@ if form.has_key("q"):
 			elif personID != "":
 				lookupSubject = "author ID"
 
-			print extraInfo()
-			print errorMarkup("The arXiv did not return any results for the " + lookupSubject + " you entered. Any chance there may be a typo in there?")
+			printHtml(extraInfo(), outputformat)
+			printHtml(errorMarkup("The arXiv did not return any results for the " + lookupSubject + " you entered. Any chance there may be a typo in there?"), outputformat)
 		else:
 			""" We got data and no error: Process it. """
 			papersiterator = feed.getiterator("{http://www.w3.org/2005/Atom}entry")
@@ -739,11 +781,13 @@ if form.has_key("q"):
 
 		if len(failedIDs) > 0:
 			if len(failedIDs) == 1:
-				print """<div class="warning">No paper with the ID “""" + failedIDs[0] + """” could be found on the arXiv.</div>\n"""
+				printHtml("""<div class="warning">No paper with the ID “""" + failedIDs[0] + """” could be found on the arXiv.</div>\n""", outputformat)
 			else:
-				print """<div class="warning">The following paper IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n"""
+				printHtml("""<div class="warning">The following paper IDs could not be found on the arXiv: """ + ", ".join(failedIDs) + """.</div>\n""", outputformat)
 
-		print "".join(output)
+		printHtml("".join(output), outputformat)
+		printPublicationsRaw(publications, format, outputformat)
 else:
-	print extraInfo()
-print pageFoot()
+	printHtml(extraInfo(), outputformat)
+
+printHtml(pageFoot(), outputformat)
