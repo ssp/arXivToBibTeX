@@ -33,16 +33,6 @@ sys.setdefaultencoding("utf-8")
 maxpapers = 100
 
 
-"""
-	Load people information.
-"""
-isPersonalised = False
-people = dict()
-if isPersonalised:
-	execfile("people.py")
-
-
-
 
 trailingRE = re.compile(r"(.*)v[0-9]*$")
 newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d+$")
@@ -242,53 +232,15 @@ one or several <em>paper IDs</em> like “1510.01797” or “math/0506203”.
 <p>
 your arXiv <em><a href="https://arxiv.org/help/author_identifiers">author ID</a></em>
 looking similar to “courant_r_1” to get a list of all your submitted papers.
-</p><p>
+</p>
+</li><p>
 In case you do not have an arXiv author ID yet, go and <a href="https://arxiv.org/set_author_id">get one now</a>.
 To ensure completeness of the list created from that, please make sure that your co-authors correctly associated
 the paper to your arXiv account after submission.
 </p>
-"""	+ personalisedBlock() + """
 </ul>
 <p>
 """
-
-
-def personalisedBlock():
-	"""
-		Creates a block with links for the people known by the tool for the start page.
-	"""
-	if isPersonalised:
-		return """
-<p>
-Convenience Links:
-""" + memberLinks() + """.
-</p>
-"""
-	return ""
-
-
-def memberLinks():
-	"""
-		Returns string with HTML containing links to look up all people with known arXiv author IDs.
-	"""
-	if not isPersonalised:
-		return ""
-
-	uniquemembers = dict()
-	for person in people.iteritems():
-		personName = person[0]
-		personData = person[1]
-		if personData.has_key(arXivID) and personData.has_key(default) and personData.has_key(crcg):
-			personID = personData[arXivID]
-			uniquemembers[personID] = personName
-
-	links = []
-	IDs = uniquemembers.keys()
-	IDs.sort()
-	for memberID in IDs:
-		links += ["<a href='./?q=" + memberID + "'>" + uniquemembers[memberID] + "</a>"]
-
-	return ", ".join(links)
 
 
 
@@ -339,15 +291,7 @@ def basicMarkupForHTMLEditing(myDict):
 	authors = myDict["authors"]
 	htmlauthors = []
 	for author in authors:
-		if people.has_key(author):
-			record = people[author]
-			if record.has_key(URL):
-				address = record[URL]
-				htmlauthors += ["<a href='" + address + "'>" + author + "</a>"]
-			else:
-				htmlauthors += [author]
-		else:
-			htmlauthors += [author]
+		htmlauthors += [author]
 	output = [", ".join(htmlauthors), ': “',  myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
 		output += [", ", myDict["journal"]]
@@ -396,15 +340,7 @@ def markupForWikiItem(myDict):
 	authors = myDict["authors"]
 	wikiauthors = []
 	for author in authors:
-		if people.has_key(author):
-			record = people[author]
-			if record.has_key(URL):
-				address = record[URL]
-				wikiauthors += ["[" + address + " " + author + "]"]
-			else:
-				wikiauthors += [author]
-		else:
-			wikiauthors += [author]
+		wikiauthors += [author]
 
 	wikioutput = ["* ", ", ".join(wikiauthors), ': “', myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
