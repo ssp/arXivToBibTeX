@@ -35,9 +35,11 @@ maxpapers = 100
 
 
 trailingRE = re.compile(r"(.*)v[0-9]*$")
-newStyleRE = re.compile(r"\d\d\d\d\.?\d\d\d\d+$")
-sevenDigitsRE = re.compile(r"\d\d\d\d\d\d\d$")
-oldStyleIDRE = re.compile(r"[a-z-]*/\d\d\d\d\d\d\d$")
+newStyleRE = re.compile(r"\d{4}\.?\d{4,}$")
+sevenDigitsRE = re.compile(r"\d{7}$")
+oldStyleIDRE = re.compile(r"[a-z-]+/\d{7}$")
+paperIDRE = re.compile(r"([a-z-]+/\d{7}|\d{4}\.\d{4,})")
+
 
 def prepareArXivID(ID):
 	"""
@@ -50,7 +52,7 @@ def prepareArXivID(ID):
 	"""
 	myID = ID.strip()
 	myID = trailingRE.sub(r"\1", myID)
-	if  newStyleRE.match(myID) != None:
+	if newStyleRE.match(myID) != None:
 		""" An 8+ digit number (new-style): insert dot in the middle in case it's not there already.	"""
 		if re.match(r"\.", myID) == None:
 			myID = re.sub(r"(\d\d\d\d)(\d\d\d\d+)$", r"\1.\2", myID)
@@ -64,6 +66,15 @@ def prepareArXivID(ID):
 
 	return myID
 
+
+def extractPapersFromArXivUriPath(path):
+	"""
+		An arXiv URL was entered, extract the last component(s) as the paper ID
+		Match both old math.ph/9902123 and new 1705.12345 style path segments
+	"""
+	paperIDMatch = paperIDRE.search(path)
+	if paperIDMatch != None:
+		return paperIDMatch.string[paperIDMatch.start(1):paperIDMatch.end(1)]
 
 
 
@@ -526,12 +537,9 @@ if form.has_key("q"):
 			personID = authorMatch.string[authorMatch.start():authorMatch.end()]
 		urlParts = urlparse(queryString)
 		if urlParts.netloc == "arxiv.org":
-			"""An arXiv URL was entered, extract the last component(s) as the paper ID"""
-			"""Match both old math.ph/9902123 and new 1705.12345 style path segments"""
-			IDRegex = r"[^\/]+/(\d{7}|\d{4}\.\d{4,})"
-			paperIDMatch = re.search(IDRegex, urlParts.path)
-			if paperIDMatch != None:
-				papers = [paperIDMatch.string[paperIDMatch.start(1):paperIDMatch.end(1)]]
+			fromUriPath = extractPapersFromArXivUriPath(urlParts.path)
+			if fromUriPath != None:
+				papers = [fromUriPath]
 
 outputformat = "html"
 if form.has_key("outputformat"):
