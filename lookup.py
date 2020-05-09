@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v7.1
-©2009-2018 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+arXivToBibTeX / arXivToWiki v7.2
+©2009-2020 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Service available at: https://arxiv2bibtex.org
 Source code available at: https://github.com/ssp/arXivToBibTeX
@@ -444,12 +444,13 @@ def markupForBibItem(myDict):
 	"""
 	bibTeXID = myDict["ID"]
 	authors = myDict["authors"]
-	authorstring = ""
+	authorString = ""
 	if len(authors) == 1:
 		authorString = authors[0]
-	else:
-		lastAuthor = authors.pop(-1)
-		authorString = ", ".join(authors) + " and " + lastAuthor
+	elif len(authors) > 1:
+		firstAuthors = authors[:-1]
+		lastAuthor = authors[-1]
+		authorString = ", ".join(firstAuthors) + " and " + lastAuthor
 
 	title = myDict["title"]
 	year = myDict["year"]
