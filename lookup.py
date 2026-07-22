@@ -104,7 +104,9 @@ def printPublicationsRaw(publications, format, outputformat):
 		elif format == "bibitem":
 			print("\n\n".join(map(lambda publication: markupForBibItem(publication), publications)))
 		elif format == "wiki":
-			print("\n".join(map(lambda publication: markupForWikiItem(publication), publications)))
+			print("\n".join(map(lambda publication: markupForWikiItem(publication, "wiki"), publications)))
+		elif format == "md":
+			print("\n".join(map(lambda publication: markupForWikiItem(publication, "md"), publications)))
 
 
 
@@ -199,7 +201,7 @@ textarea { width:100%; }
 <script>
 //<![CDATA[
 function showType(type) {
-	var myTypes = ["bibtex", "biblatex", "bibitem", "html", "wiki"];
+	var myTypes = ["bibtex", "biblatex", "bibitem", "html", "wiki", "md"];
 	var myType = (!type || myTypes.indexOf(type) === -1) ? "wiki" : type;
 	document.getElementById("formatinput").value = myType;
 	for (var i = 0; i < myTypes.length; i++) {
@@ -323,10 +325,11 @@ def basicMarkupForHTMLEditing(myDict):
 
 
 
-def wikiMarkup(items, type):
+def wikiMarkup(items, type, linkStyle):
 	"""
-		Input: items - List of publication dictionaries.
-		       type  - "Preprint" or "Publication".
+		Input: items     - List of publication dictionaries.
+		       type      - "Preprint" or "Publication".
+			   linkStyle - "md" for Markdown style, otherwise Wiki.
 		Output: Array of strings containing HTML markup with a heading and a textarea full of bibliographic information in Wiki markup.
 	"""
 	markup = []
@@ -335,22 +338,32 @@ def wikiMarkup(items, type):
 		wikiMarkup = []
 		htmlMarkup = []
 		for item in items:
-			wikiMarkup += [markupForWikiItem(item), "\n\n"]
+			wikiMarkup += [markupForWikiItem(item, linkStyle), "\n\n"]
 			htmlMarkup += [basicMarkupForHTMLEditing(item)]
 
 		wikiMarkup[-1] = wikiMarkup[-1].strip("\n")
 		factor = 3
 		if type == "Published":
 			factor = 4
-		markup = ["<p>Preview:</p>\n", "<ul><li>" , "\n</li><li>".join(htmlMarkup), "</li></ul>\n", "<p class='clear'>For copy and pasting to a Wiki:</p>\n", "<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)), "'>\n"] + wikiMarkup +  ["</textarea>\n"]
+		pasteDestination = "Markdown editor" if linkStyle == "md" else "Wiki"
+		markup = [
+			"<p>Preview:</p>\n",
+			"<ul><li>",
+			"\n</li><li>".join(htmlMarkup),
+			"</li></ul>\n",
+			f"<p class='clear'>For copy and pasting to a {pasteDestination}:</p>\n",
+			"<textarea class='wikiinfo' cols='70' rows='", str( factor * len(items)),
+			"'>\n"
+		] + wikiMarkup +  ["</textarea>\n"]
 	return markup
 
 
 
 
-def markupForWikiItem(myDict):
+def markupForWikiItem(myDict, linkStyle):
 	"""
-		Input: dictionary with publication data.
+		Input: myDict    - dictionary with publication data.
+		       linkStyle - "md" for Markdown style, otherwise Wiki.
 		Output: Wiki markup for publication data.
 	"""
 	authors = myDict["authors"]
@@ -361,16 +374,27 @@ def markupForWikiItem(myDict):
 	wikioutput = ["* ", ", ".join(wikiauthors), ': “', myDict["title"], '”, ', myDict["year"]]
 	if myDict["journal"] != None:
 		wikioutput += [", ", myDict["journal"]]
-	wikioutput += ["; [", myDict["link"], " arXiv:", myDict["ID"], "]."]
+	wikioutput += ["; ", linkMarkup(f"arXiv:{myDict['ID']}", myDict["link"], linkStyle), "."]
 	if myDict["DOI"] != None and len(myDict["DOI"]) > 0 :
 		dois = []
 		for DOI in myDict["DOI"]:
-			dois += ["[https://dx.doi.org/" + DOI + " " + DOI + "]"]
+			dois += [linkMarkup(DOI, f"https://dx.doi.org/{DOI}", linkStyle)]
 		wikioutput += [" DOI: ", ", ".join(dois) , "."]
 	result = "".join(wikioutput)
 	result = re.sub(r"\s+", r" ", result)
 	return result
 
+
+
+def linkMarkup(text, url, linkStyle):
+	"""
+		Input: text      - the string to be linked
+		       url       - the URL to link to
+ 		       linkStyle - "md" for Markdown type links [text](url), otherwise uses Wiki style links [url text]
+	"""
+	if linkStyle == "md":
+		return f"[{text}]({url})"
+	return f"[{url} {text}]"
 
 
 
@@ -557,7 +581,7 @@ def processCgi(form):
 		format = "html"
 	if "format" in form:
 		f = form["format"]
-		if f in ["wiki", "bibtex", "biblatex", "bibitem", "html"]:
+		if f in ["wiki", "bibtex", "biblatex", "bibitem", "html", "md"]:
 			format = f
 
 	printAll(pageHead(queryString, format, outputformat))
@@ -674,6 +698,7 @@ def processCgi(form):
 				"""<li><a href='javascript:showType("bibitem");' id='bibitem-link'>\\bibitem</a></li>\n""",
 				"""<li><a href='javascript:showType("html");' id='html-link'>HTML</a></li>\n""",
 				"""<li><a href='javascript:showType("wiki");' id='wiki-link'>Wiki</a></li>\n""",
+				"""<li><a href='javascript:showType("md");' id='md-link' title='Markdown'>MD</a></li>\n""",
 				"</ul>\n</div>\n"]
 
 				if len(papers) >= maxpapers:
@@ -722,10 +747,19 @@ def processCgi(form):
 				output += ["<div id='wiki'>\n"]
 				if len(preprints) > 0:
 					output += ["<h2>Preprints:</h2>\n", journalrefnote]
-					output += wikiMarkup(preprints, "Preprint")
+					output += wikiMarkup(preprints, "Preprint", "wiki")
 				if len(published) > 0:
 					output += ["<h2>Published:</h2>\n"]
-					output += wikiMarkup(published, "Published")
+					output += wikiMarkup(published, "Published", "wiki")
+				output += ["</div>\n"]
+
+				output += ["<div id='md'>\n"]
+				if len(preprints) > 0:
+					output += ["<h2>Preprints:</h2>\n", journalrefnote]
+					output += wikiMarkup(preprints, "Preprint", "md")
+				if len(published) > 0:
+					output += ["<h2>Published:</h2>\n"]
+					output += wikiMarkup(published, "Published", "md")
 				output += ["</div>\n"]
 
 
