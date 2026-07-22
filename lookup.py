@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #coding=utf-8
 """
-arXivToBibTeX / arXivToWiki v7.2
-©2009-2020 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
+arXivToBibTeX / arXivToWiki v8
+©2009-2026 Sven-S. Porst / earthlingsoft <ssp-web@earthlingsoft.net>
 
 Service available at: https://arxiv2bibtex.org
 Source code available at: https://github.com/ssp/arXivToBibTeX
