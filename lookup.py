@@ -216,6 +216,11 @@ function showType(type) {
 			document.getElementById(linkID).style.fontWeight = "normal";
 		}
 	}
+	if (window.history && window.history.replaceState) {
+		var url = new URL(window.location.href);
+		url.searchParams.set("format", myType);
+		window.history.replaceState(null, "", url);
+	}
 }
 //]]>
 </script>
