@@ -167,34 +167,34 @@ def pageHead(queryString, format, outputformat):
 <meta name='generator' content='arXiv to Wiki/BibTeX Converter, 2009-2015 by Sven-S. Porst (ssp-web@earthlingsoft.net).'/>
 <meta name='description' content='Create BibTeX, HTML or Wiki markup for papers on the mathematics and physics preprint arXiv.'/>
 <style>
-* { margin: 0em; padding: 0em; }
-body { width: 40em; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
+* { margin: 0; padding: 0; }
+body { width: 40rem; font-family: Georgia, Times, serif; line-height: 141%; margin:auto; background: #eee;}
 .clear { clear:both; }
-#title { text-align:center; margin:3em 1em; }
-p { margin: 0.5em 0em; }
+#title { text-align:center; margin:3rem 1erm; }
+p { margin: 0.5rem 0; }
 a { text-decoration: none; color: #00d; }
 a:hover { text-decoration: underline; color: #00f; }
 a:visited { color: #606; }
 a.editlink { color: #b00;}
-h1 { font-size: 144%; margin: 0.5em;}
+h1 { font-size: 144%; margin: 0.5rem;}
 a h1 { color: #000; }
-form { display:block; margin: 1em; }
+form { display:block; margin: 1rem; }
 form p { text-align:center; }
 form input { font-size: 121%; }
-form input.q { width: 60%; margin-bottom: 1em; }
-form input.button { position:relative; bottom: 3px; }
-h2 { font-size: 121%; margin:2em 0em 1em 0em; position:relative; }
-h2:before { content: "\\002767"; position: absolute; width: 1em; left:-1em; font-size: 360%; color: #999; }
+form input.q { width: 60%; margin-bottom: 1rem; }
+form input.button { padding: 0 .25rem; }
+h2 { font-size: 121%; margin:2rem 0 1rem 0; position:relative; }
+h2:before { content: "\\002767"; position: absolute; width: 1rem; left:-4rem; font-size: 360%; color: #999; }
 h2.error:before { content: "\\002718"; color: #f33; }
-ul { padding-left: 2em; }
-ul li { margin-bottom: 0.5em; }
-.formatpicker { text-align: right; margin:1em 0em -1em 0em; }
+ul { padding-left: 2rem; }
+ul li { margin-bottom: 0.5rem; }
+.formatpicker { text-align: right; margin:1rem 0 -1rem 0; }
 .formatpicker ul { display: inline; list-style-type: none; padding: 0px; }
-.formatpicker ul li { display: inline; margin-left: 0.5em; font-weight: normal; padding: 0em; }
+.formatpicker ul li { display: inline; margin-left: 0.5rem; font-weight: normal; padding: 0; }
 .format { display: none; }
 textarea { width:100%; }
-.warning { font-style:italic; text-align:center; margin: 1em 0em; color: #900;}
-#foot { font-size: 80%; font-style:italic; text-align: center; margin: 3em 0em 1em 0em; padding-top: 0.2em; border-top: #999 solid 1px; }
+.warning { font-style:italic; text-align:center; margin: 1rem 0; color: #900;}
+#foot { font-size: 80%; font-style:italic; text-align: center; margin: 3rem 0 1rem 0; padding-top: 0.2rem; border-top: #999 solid 1px; }
 </style>
 <script>
 //<![CDATA[
