@@ -245,7 +245,7 @@ one or several <em>paper IDs</em> like “1510.01797” or “math/0506203”.
 </p>
 </li><li>
 <p>
-your <a href="https://arxiv.org/help/author_identifiers">arXiv <em>author ID</em></a>
+your <a href="https://info.arxiv.org/help/author_identifiers.html">arXiv <em>author ID</em></a>
 looking similar to “grafvbothmer_h_1” to get a list of all your submitted papers.
 </p>
 </li>
@@ -265,7 +265,7 @@ def pageFoot():
 		Returns string with HTML for the bottom of the page.
 	"""
 	return """<div id="foot">
-	Data from <a href="https://arxiv.org/help/api/index">arXiv API</a>
+	Data from <a href="https://info.arxiv.org/help/api/">arXiv API</a>
 	· Site by <a href="https://earthlingsoft.net/ssp">Sven-S. Porst</a>
 	· <a href="https://github.com/ssp/arXivToWiki/issues">Feedback</a>
 </div>
@@ -530,7 +530,7 @@ def processCgi(form):
 		papers = list(set(re.sub(r",", r" ", queryString).split()))
 		""" 
 			for a single entry matching a regex we have an arXiv or ORCID autor ID
-			see https://arxiv.org/help/author_identifiers
+			see https://info.arxiv.org/help/author_identifiers.html
 		"""
 		if len(papers) == 1:
 			arxivAuthorIDRegex = r"([a-z]*_[a-z]_[0-9]*)"
