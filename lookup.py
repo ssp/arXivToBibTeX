@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding=utf-8
 """
 arXivToBibTeX / arXivToWiki v7.2
@@ -19,20 +19,22 @@ Your server setup (.htaccess file) needs to make sure that these requests are
 redirected to the script.
 """
 
-import cgi
+import html
+import io
 import re
-import urllib
-from urlparse import urlparse
+import urllib.request
+from urllib.parse import urlparse, parse_qs
 from xml.etree import ElementTree
 import xml.etree
 import os
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 
-#for debugging
-#import cgitb
-#cgitb.enable()
+"""
+	Apache's CGI environment does not necessarily set a UTF-8 locale, which would
+	otherwise make Python 3 fall back to ASCII for stdout and crash on non-ASCII
+	characters (e.g. the curly quotes used in the markup below). Force UTF-8 explicitly.
+"""
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 maxpapers = 100
 
@@ -82,13 +84,13 @@ def extractPapersFromArXivUriPath(path):
 
 
 def printAll(output):
-	print output
+	print(output)
 
 
 
-def printHtml(html, outputformat):
+def printHtml(htmlText, outputformat):
 	if outputformat == "html":
-		print html
+		print(htmlText)
 
 
 
@@ -96,13 +98,13 @@ def printHtml(html, outputformat):
 def printPublicationsRaw(publications, format, outputformat):
 	if outputformat == "raw":
 		if format == "html":
-			print "\n\n".join(map(lambda publication: basicMarkupForHTMLEditing(publication), publications))
+			print("\n\n".join(map(lambda publication: basicMarkupForHTMLEditing(publication), publications)))
 		elif format == "bibtex" or format == "biblatex":
-			print "\n\n".join(map(lambda publication: markupForBibTeXItem(publication, format), publications))
+			print("\n\n".join(map(lambda publication: markupForBibTeXItem(publication, format), publications)))
 		elif format == "bibitem":
-			print "\n\n".join(map(lambda publication: markupForBibItem(publication), publications))
+			print("\n\n".join(map(lambda publication: markupForBibItem(publication), publications)))
 		elif format == "wiki":
-			print "\n".join(map(lambda publication: markupForWikiItem(publication), publications))
+			print("\n".join(map(lambda publication: markupForWikiItem(publication), publications)))
 
 
 
@@ -112,7 +114,7 @@ def escapeHTML(inputString):
 		Input: string
 		Output: input string with < > & " replaced by their HTML character entities
 	"""
-	return cgi.escape(inputString, True)
+	return html.escape(inputString, quote=True)
 
 
 
@@ -497,22 +499,25 @@ def isInEnvironment(fieldName, string):
 
 IDCleanerRE = re.compile(r"[^0-9]*([0-9]*)\.?([0-9]*)")
 
-def comparePaperDictionaries (firstPaper, secondPaper):
+def paperSortKey(paper):
 	"""
-		Compare paper dictionaries.
+		Sort key for paper dictionaries.
 		Earlier years are smaller.
 		Smaller IDs within a year are smaller.
 	"""
-	comparisonResult = 0
-	if firstPaper.has_key("year") and firstPaper.has_key("ID") and secondPaper.has_key("year") and secondPaper.has_key("ID"):
-		comparisonResult = cmp(firstPaper["year"], secondPaper["year"])
+	cleanedID = int(IDCleanerRE.sub(r"\1\2", paper["ID"]))
+	return (paper["year"], cleanedID)
 
-		if comparisonResult == 0:
-			cleanedFirstID = int(IDCleanerRE.sub(r"\1\2", firstPaper["ID"]))
-			cleanedSecondID = int(IDCleanerRE.sub(r"\1\2", secondPaper["ID"]))
-			comparisonResult = cmp(cleanedFirstID, cleanedSecondID)
 
-	return comparisonResult
+
+def parseQueryString():
+	"""
+		Parse the CGI GET query string into a dict of the first value for each key.
+		Replaces cgi.FieldStorage, which was removed from the standard library in Python 3.13.
+	"""
+	queryString = os.environ.get("QUERY_STRING", "")
+	parsed = parse_qs(queryString)
+	return {key: values[0] for key, values in parsed.items()}
 
 
 
@@ -520,8 +525,8 @@ def processCgi(form):
 	queryString = ""
 	papers = []
 	personID = ""
-	if form.has_key("q"):
-		queryString = form["q"].value
+	if "q" in form:
+		queryString = form["q"]
 		papers = list(set(re.sub(r",", r" ", queryString).split()))
 		""" 
 			for a single entry matching a regex we have an arXiv or ORCID autor ID
@@ -540,8 +545,8 @@ def processCgi(form):
 					papers = [fromUriPath]
 
 	outputformat = "html"
-	if form.has_key("outputformat"):
-		of = form["outputformat"].value
+	if "outputformat" in form:
+		of = form["outputformat"]
 		if of in ["html", "raw"]:
 			outputformat = of
 
@@ -550,14 +555,14 @@ def processCgi(form):
 		format = "bibtex"
 	elif isRunningFromHTMLURI():
 		format = "html"
-	if form.has_key("format"):
-		f = form["format"].value
+	if "format" in form:
+		f = form["format"]
 		if f in ["wiki", "bibtex", "biblatex", "bibitem", "html"]:
 			format = f
 
 	printAll(pageHead(queryString, format, outputformat))
 
-	if form.has_key("q"):
+	if "q" in form:
 		failedIDs = []
 		if personID == "":
 			arXivIDs = []
@@ -571,8 +576,7 @@ def processCgi(form):
 		else:
 			arXivURL = "https://arxiv.org/a/" + personID + ".atom"
 
-		download = urllib.urlopen(arXivURL)
-		download.encoding = "UTF-8"
+		download = urllib.request.urlopen(arXivURL)
 		downloadedData = download.read()
 		if downloadedData == None:
 			printHtml(extraInfo(), outputformat)
@@ -595,28 +599,28 @@ def processCgi(form):
 				printHtml(errorMarkup("The arXiv did not return any results for the " + lookupSubject + " you entered. Any chance there may be a typo in there?"), outputformat)
 			else:
 				""" We got data and no error: Process it. """
-				papersiterator = feed.getiterator("{http://www.w3.org/2005/Atom}entry")
+				papersiterator = feed.iter("{http://www.w3.org/2005/Atom}entry")
 				for paper in papersiterator:
 					titleElement = paper.find("{http://www.w3.org/2005/Atom}title")
 					if titleElement == None:
 						continue
 					theTitle = re.sub(r"\s*\n\s*", r" ", titleElement.text)
-					authors = paper.getiterator("{http://www.w3.org/2005/Atom}author")
+					authors = paper.iter("{http://www.w3.org/2005/Atom}author")
 					theAuthors = []
 					for author in authors:
 						name = author.find("{http://www.w3.org/2005/Atom}name").text
 						theAuthors += [name]
 					theAbstract = paper.find("{http://www.w3.org/2005/Atom}summary").text.strip()
 
-					links = paper.getiterator("{http://www.w3.org/2005/Atom}link")
+					links = paper.iter("{http://www.w3.org/2005/Atom}link")
 					thePDF = ""
 					theLink = ""
 					for link in links:
 						attributes = link.attrib
-						if attributes.has_key("href"):
+						if "href" in attributes:
 							linktarget = attributes["href"]
-							linktype = attributes["type"] if attributes.has_key("type") else None
-							linktitle = attributes["title"] if attributes.has_key("title") else None
+							linktype = attributes["type"] if "type" in attributes else None
+							linktitle = attributes["title"] if "title" in attributes else None
 						if linktype == "application/pdf":
 							thePDF = linktarget
 						elif linktype == "text/html":
@@ -628,7 +632,7 @@ def processCgi(form):
 					theYear = paper.find("{http://www.w3.org/2005/Atom}published").text.split('-')[0]
 
 					theDOIs = []
-					DOIs = paper.getiterator("{http://arxiv.org/schemas/atom}doi")
+					DOIs = paper.iter("{http://arxiv.org/schemas/atom}doi")
 					for DOI in DOIs:
 						theDOIs += [DOI.text]
 
@@ -654,7 +658,7 @@ def processCgi(form):
 				publishedIDs = []
 				published = []
 
-				publications.sort(comparePaperDictionaries, None, True)
+				publications.sort(key=paperSortKey, reverse=True)
 
 				for publication in publications:
 					if publication["journal"] != None:
@@ -742,5 +746,5 @@ def processCgi(form):
 """
 	MAIN SCRIPT *****************************************************************
 """
-form = cgi.FieldStorage()
+form = parseQueryString()
 processCgi(form)
